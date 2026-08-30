@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3 Letter Blending</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(#ffd6e2, #e8d9ff);
+        }
+
+        h1 {
+            margin-top: 35px;
+            font-size: 42px;
+            color: #7d3c98;
+        }
+
+        /* WORD BUTTONS */
+
+        .word-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 25px auto;
+            width: 90%;
+        }
+
+        .word-button {
+            padding: 10px 20px;
+            font-size: 22px;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 4px 8px #aaa;
+        }
+
+        .word-button:hover {
+            transform: scale(1.08);
+        }
+
+        /* TRAIN AREA */
+
+        .train-area {
+            margin-top: 55px;
+            overflow: hidden;
+        }
+
+        .train {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+        }
+
+        /* ENGINE */
+
+        .engine {
+            width: 130px;
+            height: 120px;
+            background: #e74c3c;
+            border-radius: 25px 10px 10px 25px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 45px;
+            box-shadow: 0 8px 12px #999;
+        }
+
+        .engine::after {
+            content: "";
+            position: absolute;
+            right: -25px;
+            bottom: 25px;
+            width: 35px;
+            height: 15px;
+            background: #555;
+        }
+
+        /* COACH */
+
+        .coach {
+            width: 145px;
+            height: 120px;
+            background: #8e44ad;
+            border-radius: 15px;
+            margin-left: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 85px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 8px 12px #999;
+            position: relative;
+        }
+
+        /* WINDOWS */
+
+        .coach::before {
+            content: "";
+            position: absolute;
+            top: 12px;
+            left: 15px;
+            right: 15px;
+            height: 20px;
+            background: #f7dc6f;
+            border-radius: 10px;
+        }
+
+        /* WHEELS */
+
+        .wheel {
+            position: absolute;
+            bottom: -15px;
+            width: 30px;
+            height: 30px;
+            background: #333;
+            border-radius: 50%;
+        }
+
+        .wheel.left {
+            left: 25px;
+        }
+
+        .wheel.right {
+            right: 25px;
+        }
+
+        /* RESULT */
+
+        .result {
+            margin-top: 55px;
+            font-size: 100px;
+            font-weight: bold;
+            color: #ff5722;
+            opacity: 0;
+            transform: scale(0);
+            transition: 0.8s;
+        }
+
+        /* START BUTTON */
+
+        .start-button {
+            margin-top: 40px;
+            padding: 16px 38px;
+            font-size: 24px;
+            font-weight: bold;
+            border: none;
+            border-radius: 18px;
+            background: #8e44ad;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 10px #999;
+        }
+
+        .start-button:hover {
+            background: #6c3483;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🚂 Let's Blend the Word!</h1>
+
+
+    <!-- WORD SELECTION -->
+
+    <div class="word-buttons">
+
+        <button class="word-button"
+                onclick="selectWord('BAT')">
+            BAT
+        </button>
+
+        <button class="word-button"
+                onclick="selectWord('CAT')">
+            CAT
+        </button>
+
+        <button class="word-button"
+                onclick="selectWord('HAT')">
+            HAT
+        </button>
+
+        <button class="word-button"
+                onclick="selectWord('MAT')">
+            MAT
+        </button>
+
+        <button class="word-button"
+                onclick="selectWord('RAT')">
+            RAT
+        </button>
+
+    </div>
+
+
+    <!-- TRAIN -->
+
+    <div class="train-area">
+
+        <div class="train">
+
+            <!-- ENGINE -->
+
+            <div class="engine">
+                🚂
+            </div>
+
+
+            <!-- LETTER 1 -->
+
+            <div class="coach" id="letter1">
+                B
+
+                <div class="wheel left"></div>
+                <div class="wheel right"></div>
+            </div>
+
+
+            <!-- LETTER 2 -->
+
+            <div class="coach" id="letter2">
+                A
+
+                <div class="wheel left"></div>
+                <div class="wheel right"></div>
+            </div>
+
+
+            <!-- LETTER 3 -->
+
+            <div class="coach" id="letter3">
+                T
+
+                <div class="wheel left"></div>
+                <div class="wheel right"></div>
+            </div>
+
+        </div>
+
+
+        <!-- FINAL WORD -->
+
+        <div class="result" id="result">
+            BAT
+        </div>
+
+    </div>
+
+
+    <!-- START -->
+
+    <button class="start-button"
+            onclick="startTrain()">
+        🚂 Start Train
+    </button>
+
+
+    <script>
+
+        let selectedWord = "BAT";
+
+
+        function selectWord(word) {
+
+            selectedWord = word;
+
+            document.getElementById("letter1").innerText =
+                word[0];
+
+            document.getElementById("letter2").innerText =
+                word[1];
+
+            document.getElementById("letter3").innerText =
+                word[2];
+
+            document.getElementById("result").innerText =
+                word;
+
+            document.getElementById("result").style.opacity =
+                "0";
+
+            document.getElementById("result").style.transform =
+                "scale(0)";
+        }
+
+
+        function startTrain() {
+
+            const result =
+                document.getElementById("result");
+
+            result.innerText = selectedWord;
+
+            result.style.opacity = "0";
+
+            result.style.transform =
+                "scale(0)";
+
+
+            setTimeout(function () {
+
+                result.style.opacity = "1";
+
+                result.style.transform =
+                    "scale(1)";
+
+            }, 1200);
+        }
+
+    </script>
+
+</body>
+</html>

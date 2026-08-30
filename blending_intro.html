@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Reading Assessment - Vowels</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #fff5f8;
+        }
+
+        .header {
+            margin-top: 50px;
+            font-size: 55px;
+            font-weight: bold;
+            color: #b03a5b;
+        }
+
+        .flower {
+            font-size: 45px;
+        }
+
+        .subtitle {
+            margin-top: 20px;
+            font-size: 25px;
+            color: #555;
+        }
+
+        .vowel-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            margin-top: 60px;
+            flex-wrap: wrap;
+        }
+
+        .vowel-button {
+            width: 110px;
+            height: 110px;
+            border: none;
+            border-radius: 25px;
+            background: #8e44ad;
+            color: white;
+            font-size: 55px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 10px #aaa;
+            transition: 0.3s;
+        }
+
+        .vowel-button:hover {
+            transform: scale(1.1);
+            background: #6c3483;
+        }
+
+        .instruction {
+            margin-top: 45px;
+            font-size: 22px;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <span class="flower">🌸</span>
+        LET'S START WITH A VOWEL!
+        <span class="flower">🌸</span>
+    </div>
+
+    <div class="subtitle">
+        Choose the vowel you want to learn
+    </div>
+
+    <div class="vowel-container">
+
+        <button class="vowel-button"
+                onclick="location.href='blending_a'">
+            A
+        </button>
+
+        <button class="vowel-button"
+                onclick="location.href='blending_e'">
+            E
+        </button>
+
+        <button class="vowel-button"
+                onclick="location.href='blending_i'">
+            I
+        </button>
+
+        <button class="vowel-button"
+                onclick="location.href='blending_o'">
+            O
+        </button>
+
+        <button class="vowel-button"
+                onclick="location.href='blending_u'">
+            U
+        </button>
+
+    </div>
+
+    <div class="instruction">
+        👆 Select any vowel to start
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>B Vowel Mixing</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #ffd6e2;
+        }
+
+        /* Consonant buttons */
+        .consonant-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .consonant-buttons button {
+            padding: 8px 14px;
+            font-size: 20px;
+            border: 1px solid #aaa;
+            border-radius: 6px;
+            background: #e8f5e9;
+            cursor: pointer;
+        }
+
+        .consonant-buttons button:hover {
+            background: #c8e6c9;
+        }
+
+        /* Vowel buttons */
+        .vowel-buttons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .vowel-button {
+            width: 80px;
+            height: 70px;
+            border: none;
+            border-radius: 15px;
+            background: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px #aaa;
+        }
+
+        .vowel-button:hover {
+            transform: scale(1.08);
+        }
+
+        /* Main blending area */
+        .blend-area {
+            position: relative;
+            width: 90%;
+            max-width: 900px;
+            height: 350px;
+            margin: 30px auto 10px;
+            overflow: hidden;
+        }
+
+        /* A and B SAME SIZE */
+        .letter {
+            position: absolute;
+            top: 90px;
+            font-size: 100px;
+            font-weight: bold;
+            transition: all 1.5s ease-in-out;
+        }
+
+        #vowel-letter {
+            left: 80px;
+            color: #e91e63;
+        }
+
+        #consonant-letter {
+            right: 80px;
+            color: #673ab7;
+        }
+
+        .arrow {
+            position: absolute;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 50px;
+            opacity: 0;
+        }
+
+        .result {
+            position: absolute;
+            top: 75px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            font-size: 100px;
+            font-weight: bold;
+            color: #ff5722;
+            transition: transform 0.7s ease;
+        }
+
+        .join-button {
+            padding: 15px 35px;
+            font-size: 22px;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            background: #8e44ad;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 8px #999;
+        }
+
+        .join-button:hover {
+            background: #6c3483;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- CONSONANTS -->
+    <div class="consonant-buttons">
+
+        <button onclick="selectConsonant('B')">B</button>
+        <button onclick="selectConsonant('C')">C</button>
+        <button onclick="selectConsonant('D')">D</button>
+        <button onclick="selectConsonant('F')">F</button>
+        <button onclick="selectConsonant('G')">G</button>
+        <button onclick="selectConsonant('M')">M</button>
+        <button onclick="selectConsonant('N')">N</button>
+        <button onclick="selectConsonant('P')">P</button>
+        <button onclick="selectConsonant('R')">R</button>
+        <button onclick="selectConsonant('S')">S</button>
+        <button onclick="selectConsonant('T')">T</button>
+        <button onclick="selectConsonant('X')">X</button>
+        <button onclick="selectConsonant('Z')">Z</button>
+
+    </div>
+
+
+    <!-- VOWELS -->
+    <div class="vowel-buttons">
+
+        <button class="vowel-button" onclick="selectVowel('A')">A</button>
+        <button class="vowel-button" onclick="selectVowel('E')">E</button>
+        <button class="vowel-button" onclick="selectVowel('I')">I</button>
+        <button class="vowel-button" onclick="selectVowel('O')">O</button>
+        <button class="vowel-button" onclick="selectVowel('U')">U</button>
+
+    </div>
+
+
+    <!-- BLENDING AREA -->
+    <div class="blend-area">
+
+        <div class="letter" id="vowel-letter">A</div>
+
+        <div class="arrow" id="arrow">➜</div>
+
+        <div class="letter" id="consonant-letter">B</div>
+
+        <div class="result" id="result">AB</div>
+
+    </div>
+
+
+    <!-- JOIN BUTTON -->
+    <button class="join-button" onclick="joinLetters()">
+        🌟 Let's Join!
+    </button>
+
+
+    <script>
+
+        let selectedVowel = "A";
+        let selectedConsonant = "B";
+
+
+        function selectVowel(vowel) {
+
+            selectedVowel = vowel;
+
+            document.getElementById("vowel-letter").innerText = vowel;
+
+            resetAnimation();
+        }
+
+
+        function selectConsonant(consonant) {
+
+            selectedConsonant = consonant;
+
+            document.getElementById("consonant-letter").innerText = consonant;
+
+            resetAnimation();
+        }
+
+
+        function resetAnimation() {
+
+            const vowel = document.getElementById("vowel-letter");
+            const consonant = document.getElementById("consonant-letter");
+            const arrow = document.getElementById("arrow");
+            const result = document.getElementById("result");
+
+            result.innerText =
+                selectedVowel + selectedConsonant;
+
+            vowel.style.left = "80px";
+            consonant.style.right = "80px";
+
+            vowel.style.opacity = "1";
+            consonant.style.opacity = "1";
+
+            arrow.style.opacity = "0";
+
+            result.style.transform =
+                "translateX(-50%) scale(0)";
+        }
+
+
+        function joinLetters() {
+            
+
+            const vowel = document.getElementById("vowel-letter");
+            const consonant = document.getElementById("consonant-letter");
+            const arrow = document.getElementById("arrow");
+            const result = document.getElementById("result");
+
+            arrow.style.opacity = "1";
+
+            /* Vowel moves to centre */
+            vowel.style.left = "42%";
+
+            /* Consonant moves to centre */
+            consonant.style.right = "42%";
+
+
+            setTimeout(function () {
+
+                vowel.style.opacity = "0";
+                consonant.style.opacity = "0";
+                arrow.style.opacity = "0";
+
+                result.innerText =
+                    selectedVowel + selectedConsonant;
+
+                result.style.transform =
+                    "translateX(-50%) scale(1)";
+
+            }, 1500);
+        }
+
+    </script>
+
+</body>
+</html>

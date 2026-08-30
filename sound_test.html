@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sound Test</title>
+</head>
+
+<body style="text-align:center; padding-top:100px;">
+
+    <h1>🔊 Blending Sound Test</h1>
+
+    <button onclick="playBlend()"
+            style="font-size:30px; padding:15px 30px;">
+        ▶ Play A + B
+    </button>
+    <script>
+function playBlend() {
+    const audio = new Audio("/static/sounds/ab.mp3");
+    audio.volume = 1.0;
+    audio.play();
+}
+</script>
+
+    
+    
+
+</body>
+</html>

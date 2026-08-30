@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Letter M Learning</title>
+
+    <style>
+        .card {
+            width: 180px;
+            height: 180px;
+            border: 3px solid #333;
+            border-radius: 15px;
+            display: inline-block;
+            text-align: center;
+            margin: 10px;
+            padding: 10px;
+        }
+
+        .card img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+        }
+
+        .card p {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .letter {
+            font-size: 80px;
+            font-weight: bold;
+            color: black;
+            text-align: center;
+            margin: 20px;
+            display: inline-block;
+        }
+        button {
+    background-color: brown;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 20px;
+}
+
+button:hover {
+    background-color: brown;
+}
+body{
+    background-color:#FFF8DC;
+    text-align:center;
+    font-family:Arial, sans-serif;
+}
+@keyframes bounce {
+    0%   { transform: translateY(0); }
+    50%  { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+
+.animate {
+    animation: bounce 0.6s;
+}
+
+        
+    </style>
+
+</head>
+
+
+<body>
+
+    <div class="letter">
+        M  m
+    </div>
+    
+
+<button onclick="playIntro()">🔤 This is Letter M</button>
+<button onclick="playSound()">🔊 Hear the Sound</button>
+<button onclick="startRecording()">🎤 Record My Voice</button>
+<div id="myRecording"></div>
+
+<audio id="repeatSound">
+    <source src="{{ url_for('static', filename='sounds/m_repeat.mp3') }}" type="audio/mpeg">
+</audio>
+    <audio id="mSound">
+        <source src="{{ url_for('static', filename='sounds/m_sound.mp3')}}" type="audio/mpeg"></audio>
+
+<script>
+
+function playIntro() {
+    let audio = new Audio(
+        "{{ url_for('static', filename='sounds/m_intro.mp3') }}"
+    );
+
+    audio.play();
+}
+
+function playSound() {
+    let audio = document.getElementById("mSound");
+    let letter = document.querySelector(".letter");
+
+    audio.currentTime = 0;
+    audio.play();
+
+    letter.classList.remove("animate");
+    void letter.offsetWidth;
+    letter.classList.add("animate");
+}
+let recognition;
+let mediaRecorder;
+let audioChunks = [];
+async function startRecording() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true
+        });
+
+        audioChunks = [];
+
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = function(event) {
+            if (event.data.size > 0) {
+                audioChunks.push(event.data);
+            }
+        };
+
+        mediaRecorder.onstop = function() {
+            const audioBlob = new Blob(audioChunks, {
+                type: "audio/webm"
+            });
+
+            const audioURL = URL.createObjectURL(audioBlob);
+
+            const audio = document.createElement("audio");
+            audio.controls = true;
+            audio.src = audioURL;
+
+            document.getElementById("myRecording").innerHTML = "";
+            document.getElementById("myRecording").appendChild(audio);
+        };
+
+        mediaRecorder.start();
+
+        console.log("Recording started");
+
+        setTimeout(function() {
+
+            // First stop recording
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+            }
+
+            // IMPORTANT: stop microphone
+            stream.getTracks().forEach(function(track) {
+                track.stop();
+            });
+
+            console.log("Microphone stopped");
+
+        }, 5000);
+
+    } catch (error) {
+        console.log("Microphone error:", error);
+    }
+}
+function goToPrevious() {
+    window.location.href = "/letter_l";
+}
+
+function goToNext() {
+    window.location.href = "/letter_n";
+}
+
+</script>
+
+    <p>Sound : / Mm /</p>
+
+    <h3>Pictures</h3>
+
+    <div class="card">
+    <img src="{{ url_for('static', filename='images/monkey.jpg') }}" >
+    <p>Monkey</p>
+    </div>
+
+    <div class="card">
+    <img src="{{ url_for('static', filename='images/mango.jpg') }}" >   
+    <p>Mango</p>
+    </div>    
+    <br><br>
+<button onclick="goToPrevious()">
+    ← Previous
+</button>
+
+
+<button onclick="goToNext()">
+    Next ➜
+</button>
+
+    
+
+
+</body>
+</html>
+

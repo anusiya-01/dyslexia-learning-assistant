@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>AI Reading Test</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    margin:40px;
+}
+
+#passage{
+    max-width:800px;
+    margin:auto;
+    line-height:1.8;
+    font-size:22px;
+    text-align:justify;
+    border:1px solid #ccc;
+    padding:20px;
+    border-radius:10px;
+}
+
+button{
+    padding:10px 15px;
+    margin:5px;
+    cursor:pointer;
+}
+
+#output,#comparison{
+    max-width:800px;
+    margin:auto;
+    line-height:1.8;
+    font-size:18px;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<h2>Welcome {{ student_name }}</h2>
+
+
+<h2>Reading Test</h2>
+<input type="hidden" id="student_name"
+value="{{ student_name }}">
+
+<label>Select Difficulty:</label>
+
+
+<select id="level">
+
+<option value="beginner"
+{% if level=="beginner" %}selected{% endif %}>
+Beginner
+</option>
+
+
+<option value="easy"
+{% if level=="easy" %}selected{% endif %}>
+Easy
+</option>
+
+
+<option value="medium"
+{% if level=="medium" %}selected{% endif %}>
+Medium
+</option>
+
+
+<option value="hard"
+{% if level=="hard" %}selected{% endif %}>
+Hard
+</option>
+
+
+</select>
+
+
+<button onclick="loadPassage()">
+Load Passage
+</button>
+
+
+<br><br>
+
+
+<div id="passage">
+
+{{ passage }}
+
+</div>
+
+
+<br>
+
+
+<button onclick="startMic()">
+Start Speaking
+</button>
+
+
+<button onclick="pauseMic()">
+Pause
+</button>
+
+
+<button onclick="resumeMic()">
+Resume
+</button>
+
+
+<button onclick="stopMic()">
+End Reading
+</button>
+
+
+<hr>
+
+
+<h3>Speech Output</h3>
+
+<p id="output">
+Waiting...
+</p>
+
+
+<h3>Result</h3>
+
+
+<p id="time">
+Time Taken: 00:00
+</p>
+
+
+<p id="speed">
+Reading Speed: 0 WPM
+</p>
+
+<p id="accuracy">
+Accuracy: 0%
+</p>
+
+<p id="grade">
+Grade: -
+</p>
+
+<button onclick="saveResult()">💾 Save Result</button>
+
+<p id="saveMessage"></p>
+
+<input type="hidden" id="student_name"
+value="{{ student_name }}" >
+<input type="hidden" id="level"
+value="{{ level }}">
+
+<script>
+
+
+let recognition;
+
+let isListening=false;
+
+let isPaused=false;
+
+let finalTranscript="";
+
+let startTime=0;
+let timerInterval;
+let elapsedSeconds = 0;
+let minutes = 0;
+let seconds = 0;
+
+
+
+function loadPassage(){
+
+    let level=document.getElementById("level").value;
+
+    window.location.href="/test?level="+level;
+
+}
+
+
+
+const SpeechRecognition =
+window.SpeechRecognition ||
+window.webkitSpeechRecognition;
+
+
+
+if(!SpeechRecognition){
+
+    alert("Speech Recognition not supported");
+
+}
+
+else{
+
+
+recognition=new SpeechRecognition();
+
+
+recognition.lang="en-US";
+
+recognition.continuous=true;
+
+recognition.interimResults=false;
+
+recognition.maxAlternatives=1;
+
+
+
+recognition.onstart=function(){
+
+    console.log("Started");
+
+    document.getElementById("output").innerText =
+    finalTranscript + "\nListening...";
+
+};
+
+
+recognition.onresult = function(event) {
+    let transcript = " ";
+    console.log(event.results);
+
+    for(let i = event.resultIndex; i<event.results.length;i++) {
+        if( event.results[i].isFinal) {
+            transcript += event.results[i][0].transcript + " ";
+        }
+    }
+    finalTranscript += transcript;
+  
+        console.log(" Final Transcript:", finalTranscript);
+    
+    document.getElementById("output").innerText = finalTranscript;
+};
+
+
+recognition.onerror=function(event){
+
+    console.log(event.error);
+
+};
+
+
+
+
+
+recognition.onend=function(){
+
+
+    if(isListening && !isPaused){
+
+
+        try{
+
+            recognition.start();
+
+        }
+
+        catch(e){}
+
+
+    }
+
+
+};
+
+
+
+}
+
+
+
+
+
+function startMic(){
+
+
+    if(isListening)
+        return;
+
+
+
+    finalTranscript="";
+
+
+    startTime=Date.now();
+
+
+    isListening=true;
+
+    isPaused=false;
+    elapsedSeconds = 0;
+    clearInterval(timerInterval);
+
+    timerInterval = setInterval(function(){
+        elapsedSeconds++;
+        minutes = Math.floor(elapsedSeconds / 60);
+        seconds = elapsedSeconds % 60;
+        document.getElementById("time").innerText = 
+        "Time Taken: " +
+        String(minutes).padStart(2,"0")  + ":" +
+        String(seconds).padStart(2,"0");
+    },1000);
+
+
+    recognition.start();
+
+
+}
+
+
+
+
+
+
+function pauseMic(){
+
+
+    if(isListening){
+
+
+        isPaused=true;
+
+        isListening=false;
+
+        clearInterval(timerInterval);
+
+
+        recognition.stop();
+
+
+        document.getElementById("output").innerText =
+        finalTranscript + "\nPaused";
+
+
+    }
+
+
+}
+
+
+function resumeMic(){
+
+
+    if(isPaused){
+
+
+        isPaused=false;
+
+        isListening=true;
+        timerInterval = setInterval(function() {
+            elapsedSeconds++;
+            minutes = Math.floor(elapsedSeconds / 60);
+            seconds = elapsedSeconds % 60;
+            document.getElementById("time").innerText = 
+            "Time Taken:  " +
+            String(minutes).padStart(2,"0") + ":" +
+            String(seconds).padStart(2,"0");
+
+        },1000);
+ 
+        recognition.start();
+
+
+        document.getElementById("output").innerText =
+        finalTranscript + "\nListening...";
+
+
+    }
+
+
+}
+function stopMic(){
+
+    isListening = false;
+    isPaused = false;
+
+    clearInterval(timerInterval);
+    timerInterval = null;
+
+    recognition.stop();
+
+    document.getElementById("output").innerText =
+        finalTranscript;
+
+    // Wait for the final speech result
+    setTimeout(function(){
+
+        console.log("Final Transcript:", finalTranscript);
+
+        calculateSpeed();
+        calculateAccuracy();
+
+        let accuracy = document.getElementById("accuracy")
+            .innerText
+            .replace("Accuracy: ", "")
+            .replace("%", "")
+            .trim();
+
+        let speed = document.getElementById("speed")
+            .innerText
+            .replace("Reading Speed: ", "")
+            .replace(" WPM", "")
+            .trim();
+
+        let time_taken = elapsedSeconds;
+
+        fetch("/save_result", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body:
+                "name=" +
+                encodeURIComponent(
+                    document.getElementById("student_name").value
+                ) +
+                "&level=" +
+                encodeURIComponent(
+                    document.getElementById("level").value
+                ) +
+                "&accuracy=" +
+                encodeURIComponent(accuracy) +
+                "&speed=" +
+                encodeURIComponent(speed) +
+                "&time_taken=" +
+                encodeURIComponent(time_taken)
+        })
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+        });
+
+    }, 1000); 
+    document.getElementById("output").innerText =
+    finalTranscript;
+
+}
+
+function calculateSpeed() {
+    console.log(typeof document);
+    console.log(document);
+    console.log("Elapsed seconds inside speed:", elapsedSeconds);
+    let passageText =
+    document.getElementById("passage").innerText.trim();
+
+    let totalWords =
+    passageText.split(/\s+/).length;
+    console.log("Words:", totalWords);
+
+    let minutes = 
+    elapsedSeconds / 60;
+    console.log("Minutes:", minutes);
+
+    let wpm =
+    Math.round(totalWords / minutes);
+    console.log("WPM:", wpm);
+    console.log(document.getElementById);
+
+    document.getElementById("speed").innerText = 
+    "Reading Speed: " + wpm + "WPM";
+
+    console.log("Speed updated");
+}
+
+function calculateAccuracy() {
+    let originalText=
+    document.getElementById("passage").innerText;
+    let spokenText = finalTranscript;
+
+    console.log("Original:", originalText);
+    console.log("Spoken:", spokenText);
+
+    let originalWords = originalText
+    .toLowerCase()
+    .replace(/[.,!?]/g, "")
+    .trim()
+    .split(/\s+/);
+
+    let spokenWords = spokenText
+    .toLowerCase()
+    .replace(/[.,!?]/g, "")
+    .trim()
+    .split(/\s+/);
+
+    let correctWords = 0;
+    
+    spokenWords.forEach(word => {
+        if (originalWords.includes(word)) {
+            correctWords++;
+        }
+    });
+    console.log("Correct Words:", correctWords);
+    console.log("Original Words:", originalWords.length);
+    console.log("Spoken Words:", spokenWords.length);
+    let accuracy = Math.round((correctWords / originalWords.length) * 100);
+    document.getElementById("accuracy").innerText = "Accuracy: " + accuracy + "%";
+
+    let grade = "";
+    if (accuracy >= 90) {
+        grade = "Excellent";
+    }
+    else if (accuracy >= 75) {
+        grade = "Good";
+    }
+    else if (accuracy >= 50) {
+        grade = "Average";
+    }
+    else {
+        grade = "Needs Improvement";
+    }
+    document.getElementById("grade").innerText = "Grade: " + grade;
+    
+}
+
+
+ 
+</script>
+
+
+</body>
+
+</html>

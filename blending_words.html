@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3 Letter Blending</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #ffd6e2;
+        }
+
+        h1 {
+            margin-top: 35px;
+            font-size: 42px;
+            color: #8e44ad;
+        }
+
+        .word-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 30px auto;
+            width: 90%;
+        }
+
+        .word-button {
+            padding: 12px 22px;
+            font-size: 24px;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 4px 8px #aaa;
+        }
+
+        .word-button:hover {
+            transform: scale(1.08);
+        }
+
+        .train-area {
+            width: 90%;
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        .train {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .coach {
+            width: 150px;
+            height: 120px;
+            border-radius: 20px;
+            background: #8e44ad;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 80px;
+            font-weight: bold;
+            box-shadow: 0 5px 10px #999;
+        }
+
+        .connector {
+            font-size: 35px;
+            font-weight: bold;
+        }
+
+        .result {
+            margin-top: 45px;
+            font-size: 90px;
+            font-weight: bold;
+            color: #ff5722;
+            opacity: 0;
+            transform: scale(0);
+            transition: 0.7s;
+        }
+
+        .start-button {
+            padding: 15px 35px;
+            font-size: 23px;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            background: #8e44ad;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 8px #999;
+        }
+
+        .start-button:hover {
+            background: #6c3483;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🚂 Let's Blend the Word!</h1>
+
+    <!-- WORD SELECTION -->
+    <div class="word-buttons">
+
+        <button class="word-button" onclick="selectWord('BAT')">
+            BAT
+        </button>
+
+        <button class="word-button" onclick="selectWord('CAT')">
+            CAT
+        </button>
+
+        <button class="word-button" onclick="selectWord('HAT')">
+            HAT
+        </button>
+
+        <button class="word-button" onclick="selectWord('MAT')">
+            MAT
+        </button>
+
+        <button class="word-button" onclick="selectWord('RAT')">
+            RAT
+        </button>
+
+    </div>
+
+
+    <!-- TRAIN -->
+    <div class="train-area">
+
+        <div class="train">
+
+            <div class="coach" id="letter1">B</div>
+
+            <div class="connector">➜</div>
+
+            <div class="coach" id="letter2">A</div>
+
+            <div class="connector">➜</div>
+
+            <div class="coach" id="letter3">T</div>
+
+        </div>
+
+        <div class="result" id="result">
+            BAT
+        </div>
+
+    </div>
+
+
+    <!-- START BUTTON -->
+    <button class="start-button" onclick="startTrain()">
+        🚂 Start Train
+    </button>
+
+
+    <script>
+
+        let selectedWord = "BAT";
+
+
+        function selectWord(word) {
+
+            selectedWord = word;
+
+            document.getElementById("letter1").innerText =
+                word[0];
+
+            document.getElementById("letter2").innerText =
+                word[1];
+
+            document.getElementById("letter3").innerText =
+                word[2];
+
+            document.getElementById("result").innerText =
+                word;
+
+            document.getElementById("result").style.opacity =
+                "0";
+
+            document.getElementById("result").style.transform =
+                "scale(0)";
+        }
+
+
+        function startTrain() {
+
+            const result =
+                document.getElementById("result");
+
+            result.innerText = selectedWord;
+
+            setTimeout(function () {
+
+                result.style.opacity = "1";
+
+                result.style.transform =
+                    "scale(1)";
+
+            }, 1200);
+        }
+
+    </script>
+
+</body>
+</html>

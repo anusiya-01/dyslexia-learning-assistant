@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dyslexia Learning Assistant</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <header class="header">
+
+            <div class="character">🧒🏻📚</div>
+
+            <h1>🧠 Dyslexia Learning Assistant</h1>
+
+            <p class="subtitle">
+                Learn • Practice • Grow 🌟
+            </p>
+
+            <p class="helper-text">
+                Choose an activity and start learning! 💖
+            </p>
+
+        </header>
+
+
+        <main class="activities">
+
+            <!-- READING -->
+            <a href="http://127.0.0.1:5000/test?level=beginner" class="activity-link">
+
+                <div class="activity-btn reading-btn">
+
+                    <div class="activity-icon">📖</div>
+
+                    <div>
+                        <h2>Reading</h2>
+                        <p>Practice reading & improve your skills</p>
+                    </div>
+
+                    <span class="arrow">→</span>
+
+                </div>
+
+            </a>
+
+
+            <!-- PHONICS -->
+            <a href="#" class="activity-link"
+               onclick="comingSoon(event, 'Phonics')">
+
+                <div class="activity-btn phonics-btn">
+
+                    <div class="activity-icon">🔤</div>
+
+                    <div>
+                        <h2>Phonics</h2>
+                        <p>Learn sounds & letter blending</p>
+                    </div>
+
+                    <span class="arrow">→</span>
+
+                </div>
+
+            </a>
+
+
+            <!-- GAMES -->
+            <a href="#" class="activity-link"
+               onclick="comingSoon(event, 'Games')">
+
+                <div class="activity-btn progress-btn">
+
+                    <div class="activity-icon">🎮</div>
+
+                    <div>
+                        <h2>Games</h2>
+                        <p>Learn while playing fun games</p>
+                    </div>
+
+                    <span class="arrow">→</span>
+
+                </div>
+
+            </a>
+
+        </main>
+
+
+        <section class="motivation">
+
+            <div class="star">⭐</div>
+
+            <h2>
+                Every little step<br>
+                makes you better! 💖
+            </h2>
+
+            <p>
+                Learn • Practice • Have Fun! 🌈
+            </p>
+
+        </section>
+
+
+        <footer>
+            💗 Dyslexia Learning Assistant
+        </footer>
+
+    </div>
+
+
+    <script>
+
+        function comingSoon(event, name) {
+
+            event.preventDefault();
+
+            alert(name + " section is coming soon! 🌟");
+
+        }
+
+    </script>
+
+</body>
+
+</html>

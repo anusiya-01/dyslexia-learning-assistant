@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Phonics Learning</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Arial", sans-serif;
+            background: linear-gradient(135deg, #eef5ff, #fff4fb);
+            min-height: 100vh;
+            color: #26324a;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1100px;
+            margin: auto;
+            padding: 35px 0 50px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .character {
+            font-size: 65px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        h1 {
+            margin: 10px 0 5px;
+            font-size: 38px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            margin: 0;
+            color: #667085;
+        }
+
+        .section-title {
+            text-align: center;
+            margin: 30px 0 18px;
+            font-size: 25px;
+        }
+
+        .letters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
+            gap: 14px;
+        }
+
+        .letter {
+            text-decoration: none;
+            background: white;
+            border-radius: 18px;
+            padding: 18px 8px;
+            text-align: center;
+            font-size: 30px;
+            font-weight: bold;
+            box-shadow: 0 7px 18px rgba(60, 70, 100, 0.12);
+            transition: 0.25s;
+            color: #384860;
+        }
+
+        .letter:hover {
+            transform: translateY(-7px) scale(1.04);
+            box-shadow: 0 12px 25px rgba(60, 70, 100, 0.20);
+        }
+
+        .letter small {
+            display: block;
+            font-size: 12px;
+            margin-top: 6px;
+            color: #7b8494;
+            font-weight: normal;
+        }
+
+        .vowel-box {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 25px;
+            border-radius: 28px;
+            box-shadow: 0 10px 30px rgba(60, 70, 100, 0.10);
+        }
+
+        .vowels {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 18px;
+        }
+
+        .vowel {
+            text-decoration: none;
+            background: white;
+            border-radius: 22px;
+            padding: 25px 10px;
+            text-align: center;
+            font-size: 35px;
+            font-weight: bold;
+            color: #384860;
+            box-shadow: 0 7px 18px rgba(60, 70, 100, 0.12);
+            transition: 0.25s;
+        }
+
+        .vowel:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 13px 25px rgba(60, 70, 100, 0.20);
+        }
+
+        .vowel span {
+            display: block;
+            font-size: 13px;
+            margin-top: 8px;
+            color: #7b8494;
+        }
+
+        .back {
+            display: block;
+            width: fit-content;
+            margin: 35px auto 0;
+            padding: 12px 22px;
+            border-radius: 25px;
+            text-decoration: none;
+            background: #ffffff;
+            color: #384860;
+            font-weight: bold;
+            box-shadow: 0 6px 15px rgba(60, 70, 100, 0.12);
+        }
+
+        @media (max-width: 600px) {
+
+            h1 {
+                font-size: 30px;
+            }
+
+            .character {
+                font-size: 52px;
+            }
+
+            .vowels {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <header class="header">
+
+        <div class="character">🧒🏻📚</div>
+
+        <h1>🔤 Phonics Learning</h1>
+
+        <p class="subtitle">
+            Learn sounds • Practice letters • Build words 🌟
+        </p>
+
+    </header>
+
+
+    <h2 class="section-title">
+        ✨ Learn Letter Sounds
+    </h2>
+
+
+    <div class="letters">
+
+        <a href="letter" class="letter">A<small>Sound</small></a>
+        <a href="letter_b" class="letter">B<small>Sound</small></a>
+        <a href="letter_c" class="letter">C<small>Sound</small></a>
+        <a href="letter_d" class="letter">D<small>Sound</small></a>
+        <a href="letter_e" class="letter">E<small>Sound</small></a>
+        <a href="letter_f" class="letter">F<small>Sound</small></a>
+        <a href="letter_g" class="letter">G<small>Sound</small></a>
+        <a href="letter_h" class="letter">H<small>Sound</small></a>
+        <a href="letter_i" class="letter">I<small>Sound</small></a>
+        <a href="letter_j" class="letter">J<small>Sound</small></a>
+        <a href="letter_k" class="letter">K<small>Sound</small></a>
+        <a href="letter_l" class="letter">L<small>Sound</small></a>
+        <a href="letter_m" class="letter">M<small>Sound</small></a>
+        <a href="letter_n" class="letter">N<small>Sound</small></a>
+        <a href="letter_o" class="letter">O<small>Sound</small></a>
+        <a href="letter_p" class="letter">P<small>Sound</small></a>
+        <a href="letter_q" class="letter">Q<small>Sound</small></a>
+        <a href="letter_r" class="letter">R<small>Sound</small></a>
+        <a href="letter_s" class="letter">S<small>Sound</small></a>
+        <a href="letter_t" class="letter">T<small>Sound</small></a>
+        <a href="letter_u" class="letter">U<small>Sound</small></a>
+        <a href="letter_v" class="letter">V<small>Sound</small></a>
+        <a href="letter_w" class="letter">W<small>Sound</small></a>
+        <a href="letter_x" class="letter">X<small>Sound</small></a>
+        <a href="letter_y" class="letter">Y<small>Sound</small></a>
+        <a href="letter_z" class="letter">Z<small>Sound</small></a>
+
+    </div>
+
+
+    <div class="vowel-box">
+
+        <h2 class="section-title">
+            🌈 Vowel Blending
+        </h2>
+
+        <div class="vowels">
+
+            <a href="blending_a" class="vowel">
+                A
+                <span>Blend A</span>
+            </a>
+
+            <a href="blending_e" class="vowel">
+                E
+                <span>Blend E</span>
+            </a>
+
+            <a href="blending_i" class="vowel">
+                I
+                <span>Blend I</span>
+            </a>
+
+            <a href="blending_o" class="vowel">
+                O
+                <span>Blend O</span>
+            </a>
+
+            <a href="blending_u" class="vowel">
+                U
+                <span>Blend U</span>
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <a href="index.html" class="back">
+        🏠 Back to Home
+    </a>
+
+</div>
+
+</body>
+
+</html>

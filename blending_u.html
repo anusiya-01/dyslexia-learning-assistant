@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>U + B Blending</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #ffd6e2;
+        }
+
+        .blend-area {
+            position: relative;
+            width: 90%;
+            max-width: 900px;
+            height: 350px;
+            margin: 50px auto 20px;
+            overflow: hidden;
+        }
+
+        .letter {
+            position: absolute;
+            top: 90px;
+            font-size: 100px;
+            font-weight: bold;
+            transition: all 1.5s ease-in-out;
+        }
+
+        #u {
+            left: 80px;
+            color: #e91e63;
+        }
+
+        #b {
+            right: 80px;
+            color: #673ab7;
+        }
+
+        .arrow {
+            position: absolute;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 50px;
+            opacity: 0;
+        }
+
+        .result {
+            position: absolute;
+            top: 75px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            font-size: 105px;
+            font-weight: bold;
+            color: #ff5722;
+            transition: transform 0.7s ease;
+        }
+
+        .join-button {
+            padding: 15px 35px;
+            font-size: 22px;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            background: #8e44ad;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 8px #999;
+        }
+
+        .join-button:hover {
+            background: #6c3483;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="combination-buttons">
+    <button onclick="selectLetter('B')">B</button>
+    <button onclick="selectLetter('C')">C</button>
+    <button onclick="selectLetter('D')">D</button>
+    <button onclick="selectLetter('F')">F</button>
+    <button onclick="selectLetter('G')">G</button>
+    <button onclick="selectLetter('M')">M</button>
+    <button onclick="selectLetter('N')">N</button>
+    <button onclick="selectLetter('P')">P</button>
+    <button onclick="selectLetter('R')">R</button>
+    <button onclick="selectLetter('S')">S</button>
+    <button onclick="selectLetter('T')">T</button>
+    <button onclick="selectLetter('X')">X</button>
+    <button onclick="selectLetter('Y')">Y</button>
+    
+    
+</div>
+
+    <div class="blend-area">
+
+        <div class="letter" id="u">U</div>
+
+        <div class="arrow" id="arrow">➜</div>
+
+        <div class="letter" id="b">B</div>
+
+        <div class="result" id="result">UB</div>
+
+    </div>
+
+    <button class="join-button" onclick="joinLetters()">
+        🌟 Let's Join!
+    </button>
+
+    <script>
+        let selectedLetter = "B";
+
+function selectLetter(letter) {
+    selectedLetter = letter;
+
+    document.getElementById("b").innerText = letter;
+    document.getElementById("result").innerText = "U" + letter;
+
+    // Reset animation
+    const u = document.getElementById("u");
+    const b = document.getElementById("b");
+    const arrow = document.getElementById("arrow");
+    const result = document.getElementById("result");
+
+    u.style.left = "80px";
+    b.style.right = "80px";
+
+    u.style.opacity = "1";
+    b.style.opacity = "1";
+    arrow.style.opacity = "0";
+    result.style.transform = "translateX(-50%) scale(0)";
+}
+function joinLetters() {
+
+    const u = document.getElementById("u");
+    const b = document.getElementById("b");
+    const arrow = document.getElementById("arrow");
+    const result = document.getElementById("result");
+
+    const combination =
+        "u" + selectedLetter.toLowerCase();
+
+    const audio = new Audio(
+        "/static/sounds/" + combination + ".mp3"
+    );
+
+    audio.volume = 1.0;
+    audio.play();
+
+    arrow.style.opacity = "1";
+
+    u.style.left = "42%";
+    b.style.right = "42%";
+
+    setTimeout(function () {
+
+        u.style.opacity = "0";
+        b.style.opacity = "0";
+        arrow.style.opacity = "0";
+
+        result.style.transform =
+            "translateX(-50%) scale(1)";
+
+    }, 1500);
+}
+
+
+    </script>
+
+</body>
+</html>
