@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Reading Practice</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- Header -->
+    <header class="header">
+
+        <button onclick="goHome()" class="back-btn">
+            ← Home
+        </button>
+
+        <div class="character">
+            🧒🏻📖
+        </div>
+
+        <h1>📖 Reading Practice</h1>
+
+        <p class="subtitle">
+            Read slowly • Read clearly • Do your best! 🌟
+        </p>
+
+    </header>
+
+
+    <!-- Reading Card -->
+    <section class="reading-card">
+
+        <div class="book-icon">
+            📚
+        </div>
+
+        <h2>Let's Read! 🌈</h2>
+
+        <p class="instruction">
+            Read the passage aloud when you are ready.
+        </p>
+
+
+        <!-- Passage -->
+        <div class="passage">
+
+            <p id="passageText">
+                The little boy went to the garden.
+                He saw a beautiful butterfly near a flower.
+                The butterfly was small and colorful.
+                The boy smiled and watched it fly away.
+            </p>
+
+        </div>
+
+
+        <!-- Timer -->
+        <div class="timer-box">
+
+            <span>⏱️ Time</span>
+
+            <strong id="timer">
+                00:00
+            </strong>
+
+        </div>
+
+
+        <!-- Buttons -->
+        <div class="reading-buttons">
+
+            <button
+                id="startBtn"
+                class="start-btn"
+                onclick="startReading()">
+
+                🎤 Start Reading
+
+            </button>
+
+
+            <button
+                id="stopBtn"
+                class="stop-btn"
+                onclick="stopReading()"
+                disabled>
+
+                ⏹️ Finish
+
+            </button>
+
+        </div>
+
+
+        <!-- Status -->
+        <p id="status" class="status">
+            Click "Start Reading" when you are ready 😊
+        </p>
+
+
+        <!-- Result -->
+        <div id="result" class="result-box">
+
+            <h2>🎉 Great Job!</h2>
+
+            <p>
+                You completed the reading practice.
+            </p>
+
+            <div class="result-details">
+
+                <div>
+                    <span>⏱️ Time</span>
+                    <strong id="finalTime">--</strong>
+                </div>
+
+                <div>
+                    <span>🎯 Accuracy</span>
+                    <strong id="accuracy">--</strong>
+                </div>
+
+            </div>
+
+            <button onclick="goHome()" class="home-btn">
+                🏠 Back to Home
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- Motivation -->
+    <section class="motivation">
+
+        <div class="star">
+            ⭐
+        </div>
+
+        <h2>
+            You can do it! 💖
+        </h2>
+
+        <p>
+            Every word you read makes you stronger! 🌟
+        </p>
+
+    </section>
+
+
+    <footer>
+        💗 Learn • 🌟 Practice • 🏆 Improve
+    </footer>
+
+</div>
+
+
+<script>
+
+let seconds = 0;
+let timerInterval = null;
+
+
+/* Start Reading */
+function startReading() {
+
+    seconds = 0;
+
+    document.getElementById("startBtn").disabled = true;
+    document.getElementById("stopBtn").disabled = false;
+
+    document.getElementById("status").innerText =
+        "🎤 Reading started... Take your time!";
+
+    document.getElementById("result").style.display = "none";
+
+    timerInterval = setInterval(function () {
+
+        seconds++;
+
+        let minutes = Math.floor(seconds / 60);
+        let secs = seconds % 60;
+
+        document.getElementById("timer").innerText =
+            String(minutes).padStart(2, "0") +
+            ":" +
+            String(secs).padStart(2, "0");
+
+    }, 1000);
+
+}
+
+
+/* Finish Reading */
+function stopReading() {
+
+    clearInterval(timerInterval);
+
+    document.getElementById("startBtn").disabled = false;
+    document.getElementById("stopBtn").disabled = true;
+
+    let minutes = Math.floor(seconds / 60);
+    let secs = seconds % 60;
+
+    let finalTime =
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(secs).padStart(2, "0");
+
+    document.getElementById("finalTime").innerText =
+        finalTime;
+
+    /*
+       Temporary accuracy value.
+       Later we can connect this with
+       microphone / speech recognition.
+    */
+
+    document.getElementById("accuracy").innerText =
+        "85%";
+
+    document.getElementById("status").innerText =
+        "🎉 Well done! You finished the reading.";
+
+    document.getElementById("result").style.display =
+        "block";
+
+}
+
+
+/* Home */
+function goHome() {
+
+    window.location.href = "index.html";
+
+}
+
+</script>
+
+</body>
+</html>

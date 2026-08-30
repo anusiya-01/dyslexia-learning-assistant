@@ -1,134 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Dyslexia Learning Assistant</title>
-
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <div class="app">
+    <div class="background">
+        <span class="star">⭐</span>
+        <span class="star">✨</span>
+        <span class="star">⭐</span>
+        <span class="star">✨</span>
+        <span class="cloud">☁️</span>
+        <span class="cloud cloud2">☁️</span>
+    </div>
 
-        <header class="header">
+    <main class="container">
 
-            <div class="character">🧒🏻📚</div>
+        <!-- Header -->
+        <header>
+            <div class="logo">🧠</div>
 
-            <h1>🧠 Dyslexia Learning Assistant</h1>
-
-            <p class="subtitle">
-                Learn • Practice • Grow 🌟
-            </p>
-
-            <p class="helper-text">
-                Choose an activity and start learning! 💖
-            </p>
-
+            <div>
+                <h1>Dyslexia Learning Assistant</h1>
+                <p>Learn • Practice • Improve</p>
+            </div>
         </header>
 
+        <!-- Welcome Section -->
+        <section class="hero">
 
-        <main class="activities">
+            <!-- Cute Cartoon -->
+            <div class="character">
 
-            <!-- READING -->
-            <a href="http://127.0.0.1:5000/test?level=beginner" class="activity-link">
+                <div class="crown">👑</div>
 
-                <div class="activity-btn reading-btn">
+                <div class="head">
+                    <div class="hair"></div>
 
-                    <div class="activity-icon">📖</div>
-
-                    <div>
-                        <h2>Reading</h2>
-                        <p>Practice reading & improve your skills</p>
+                    <div class="eye eye1">
+                        <span></span>
                     </div>
 
-                    <span class="arrow">→</span>
-
-                </div>
-
-            </a>
-
-
-            <!-- PHONICS -->
-            <a href="#" class="activity-link"
-               onclick="comingSoon(event, 'Phonics')">
-
-                <div class="activity-btn phonics-btn">
-
-                    <div class="activity-icon">🔤</div>
-
-                    <div>
-                        <h2>Phonics</h2>
-                        <p>Learn sounds & letter blending</p>
+                    <div class="eye eye2">
+                        <span></span>
                     </div>
 
-                    <span class="arrow">→</span>
+                    <div class="mouth"></div>
 
+                    <div class="cheek cheek1"></div>
+                    <div class="cheek cheek2"></div>
                 </div>
 
-            </a>
+                <div class="body">👕</div>
 
+                <div class="book">📖</div>
 
-            <!-- GAMES -->
-            <a href="#" class="activity-link"
-               onclick="comingSoon(event, 'Games')">
+            </div>
 
-                <div class="activity-btn progress-btn">
+            <div class="welcome-text">
+                <span class="hello">👋 Welcome!</span>
 
-                    <div class="activity-icon">🎮</div>
+                <h2>Let's Learn Together!</h2>
 
-                    <div>
-                        <h2>Games</h2>
-                        <p>Learn while playing fun games</p>
-                    </div>
+                <p>
+                    Reading can be fun, easy and exciting.
+                    Choose an activity and start learning!
+                </p>
 
-                    <span class="arrow">→</span>
-
+                <div class="learning-pills">
+                    <span>🌟 Learn</span>
+                    <span>💗 Practice</span>
+                    <span>🏆 Improve</span>
                 </div>
-
-            </a>
-
-        </main>
-
-
-        <section class="motivation">
-
-            <div class="star">⭐</div>
-
-            <h2>
-                Every little step<br>
-                makes you better! 💖
-            </h2>
-
-            <p>
-                Learn • Practice • Have Fun! 🌈
-            </p>
+            </div>
 
         </section>
 
 
+        <!-- Learning Cards -->
+        <section class="cards">
+
+            <!-- Reading -->
+            <div class="card reading-card">
+
+                <div class="card-icon">📚</div>
+
+                <h3>Reading</h3>
+
+                <p>
+                    Read passages and improve
+                    your reading skills.
+                </p>
+
+                <button onclick="openReading()">
+                    Let's Read! →
+                </button>
+
+            </div>
+
+
+            <!-- Phonics -->
+            <div class="card phonics-card">
+
+                <div class="card-icon">🔤</div>
+
+                <h3>Phonics</h3>
+
+                <p>
+                    Learn letter sounds and
+                    practice blending.
+                </p>
+
+                <button onclick="openPhonics()">
+                    Let's Learn! →
+                </button>
+
+            </div>
+
+
+            <!-- Progress -->
+            <div class="card progress-card">
+
+                <div class="card-icon">🏆</div>
+
+                <h3>My Progress</h3>
+
+                <p>
+                    See your learning journey
+                    and improvements.
+                </p>
+
+                <button onclick="openProgress()">
+                    Check Now! →
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- Motivation -->
+        <section class="motivation">
+            <span>💖</span>
+
+            <h3>
+                "Every small step leads to a big success!"
+            </h3>
+
+            <span>⭐</span>
+        </section>
+
+
         <footer>
-            💗 Dyslexia Learning Assistant
+            💗 Keep Learning • Keep Growing • Stay Happy! 🌟
         </footer>
 
-    </div>
+    </main>
 
-
-    <script>
-
-        function comingSoon(event, name) {
-
-            event.preventDefault();
-
-            alert(name + " section is coming soon! 🌟");
-
-        }
-
-    </script>
+    <script src="script.js"></script>
 
 </body>
-
 </html>
