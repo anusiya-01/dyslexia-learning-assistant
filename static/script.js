@@ -3,7 +3,7 @@ function openReading() {
 }
 
 function openPhonics() {
-    window.location.href = "http://127.0.0.1:5000/phonics";
+    window.location.href = "/phonics";
 }
     
 
