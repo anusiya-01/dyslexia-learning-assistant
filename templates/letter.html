@@ -113,9 +113,11 @@ function playSound() {
     void letter.offsetWidth;
     letter.classList.add("animate");
 }
+
 let recognition;
 let mediaRecorder;
 let audioChunks = [];
+
 function showResult(score) {
 
     const result = document.getElementById("result");
@@ -123,151 +125,194 @@ function showResult(score) {
 
     result.innerText = "Score: " + score + "%";
 
-    if (score >= 90) {
+    if (score >= 80) {
         appreciation.innerText = "🌟 Excellent! Perfect pronunciation!";
     }
-    else if (score >= 80) {
+    else if (score >= 65) {
         appreciation.innerText = "👏 Very Good! Keep it up!";
     }
-    else if (score >= 60) {
+    else if (score >= 45) {
         appreciation.innerText = "👍 Good Try! Practice once more!";
     }
     else {
         appreciation.innerText = "💪 Keep Practicing! Try again!";
     }
 }
-    function compareVoice(referenceAudio, userAudio) {
 
-    function getFeatures(audioBuffer) {
+/* ---------------- IMPROVED VOICE COMPARISON ----------------
+   Old version compared samples split by "index % 3" which is NOT
+   real frequency analysis - it barely distinguished sounds at all,
+   which is why wrong pronunciations still scored 90%+.
 
-        const data = audioBuffer.getChannelData(0);
+   New version:
+   1. Trims silence from both clips
+   2. Runs a real FFT to get the frequency spectrum
+   3. Groups spectrum into log-spaced bands (like human hearing)
+   4. Compares the "shape" of reference vs user spectrum (cosine similarity)
+   5. Also factors in duration match and whether user actually spoke
+------------------------------------------------------------- */
 
+function trimSilence(data, sampleRate, threshold = 0.02) {
+    const frameSize = Math.floor(sampleRate * 0.02); // 20ms frames
+    let start = 0;
+    let end = data.length;
+
+    for (let i = 0; i < data.length; i += frameSize) {
         let sum = 0;
-        let zeroCrossings = 0;
+        const endI = Math.min(i + frameSize, data.length);
+        for (let j = i; j < endI; j++) sum += data[j] * data[j];
+        const rms = Math.sqrt(sum / (endI - i));
+        if (rms > threshold) { start = i; break; }
+    }
 
-        let low = 0;
-        let mid = 0;
-        let high = 0;
+    for (let i = data.length - frameSize; i >= 0; i -= frameSize) {
+        let sum = 0;
+        const endI = Math.min(i + frameSize, data.length);
+        for (let j = i; j < endI; j++) sum += data[j] * data[j];
+        const rms = Math.sqrt(sum / (endI - i));
+        if (rms > threshold) { end = endI; break; }
+    }
 
-        for (let i = 0; i < data.length; i++) {
+    if (end <= start) return data; // fallback: couldn't detect speech, use full clip
+    return data.slice(start, end);
+}
 
-            const value = data[i];
+function nextPow2(n) {
+    let p = 1;
+    while (p < n) p *= 2;
+    return p;
+}
 
-            sum += value * value;
+// Iterative radix-2 FFT (in-place)
+function fft(re, im) {
+    const n = re.length;
 
-            if (i > 0) {
-                if (
-                    (data[i - 1] >= 0 && value < 0) ||
-                    (data[i - 1] < 0 && value >= 0)
-                ) {
-                    zeroCrossings++;
-                }
-            }
+    for (let i = 1, j = 0; i < n; i++) {
+        let bit = n >> 1;
+        for (; j & bit; bit >>= 1) j ^= bit;
+        j ^= bit;
+        if (i < j) {
+            [re[i], re[j]] = [re[j], re[i]];
+            [im[i], im[j]] = [im[j], im[i]];
+        }
+    }
 
-            const frequencyPart =
-                Math.abs(value);
-
-            if (i % 3 === 0) {
-                low += frequencyPart;
-            }
-            else if (i % 3 === 1) {
-                mid += frequencyPart;
-            }
-            else {
-                high += frequencyPart;
+    for (let len = 2; len <= n; len <<= 1) {
+        const ang = -2 * Math.PI / len;
+        const wr = Math.cos(ang), wi = Math.sin(ang);
+        for (let i = 0; i < n; i += len) {
+            let curWr = 1, curWi = 0;
+            for (let j = 0; j < len / 2; j++) {
+                const ur = re[i + j], ui = im[i + j];
+                const vr = re[i + j + len / 2] * curWr - im[i + j + len / 2] * curWi;
+                const vi = re[i + j + len / 2] * curWi + im[i + j + len / 2] * curWr;
+                re[i + j] = ur + vr;
+                im[i + j] = ui + vi;
+                re[i + j + len / 2] = ur - vr;
+                im[i + j + len / 2] = ui - vi;
+                const nWr = curWr * wr - curWi * wi;
+                const nWi = curWr * wi + curWi * wr;
+                curWr = nWr;
+                curWi = nWi;
             }
         }
+    }
+}
 
-        const rms =
-            Math.sqrt(sum / data.length);
+function getSpectrumBands(data, sampleRate, numBands = 12, maxFreq = 5000) {
+    const frameLength = nextPow2(Math.min(data.length, 4096));
+    const re = new Float64Array(frameLength);
+    const im = new Float64Array(frameLength);
 
-        const zcr =
-            zeroCrossings / data.length;
-
-        const total =
-            low + mid + high || 1;
-
-        return {
-            rms: rms,
-            zcr: zcr,
-            low: low / total,
-            mid: mid / total,
-            high: high / total
-        };
+    for (let i = 0; i < frameLength; i++) {
+        const sample = i < data.length ? data[i] : 0;
+        // Hamming window reduces edge artifacts
+        const w = 0.54 - 0.46 * Math.cos((2 * Math.PI * i) / (frameLength - 1));
+        re[i] = sample * w;
     }
 
+    fft(re, im);
 
-    const reference =
-        getFeatures(referenceAudio);
-
-    const user =
-        getFeatures(userAudio);
-
-
-    function similarity(a, b) {
-
-        const difference =
-            Math.abs(a - b);
-
-        const maximum =
-            Math.max(Math.abs(a), Math.abs(b), 0.000001);
-
-        return Math.max(
-            0,
-            1 - (difference / maximum)
-        );
+    const half = frameLength / 2;
+    const magnitude = new Float64Array(half);
+    for (let i = 0; i < half; i++) {
+        magnitude[i] = Math.sqrt(re[i] * re[i] + im[i] * im[i]);
     }
 
+    const bands = new Array(numBands).fill(0);
+    const nyquist = sampleRate / 2;
+    const minFreq = 80;
 
-    const rmsScore =
-        similarity(
-            reference.rms,
-            user.rms
-        );
+    for (let b = 0; b < numBands; b++) {
+        const f1 = minFreq * Math.pow(maxFreq / minFreq, b / numBands);
+        const f2 = minFreq * Math.pow(maxFreq / minFreq, (b + 1) / numBands);
+        const bin1 = Math.floor((f1 / nyquist) * half);
+        const bin2 = Math.max(bin1 + 1, Math.floor((f2 / nyquist) * half));
+        let sum = 0, count = 0;
+        for (let k = bin1; k < bin2 && k < half; k++) {
+            sum += magnitude[k];
+            count++;
+        }
+        bands[b] = count > 0 ? sum / count : 0;
+    }
 
-    const zcrScore =
-        similarity(
-            reference.zcr,
-            user.zcr
-        );
+    // Normalize so overall loudness doesn't dominate - we want SHAPE match
+    const total = bands.reduce((a, b) => a + b, 0) || 1;
+    return bands.map(v => v / total);
+}
 
-    const lowScore =
-        similarity(
-            reference.low,
-            user.low
-        );
+function cosineSimilarity(a, b) {
+    let dot = 0, normA = 0, normB = 0;
+    for (let i = 0; i < a.length; i++) {
+        dot += a[i] * b[i];
+        normA += a[i] * a[i];
+        normB += b[i] * b[i];
+    }
+    if (normA === 0 || normB === 0) return 0;
+    return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+}
 
-    const midScore =
-        similarity(
-            reference.mid,
-            user.mid
-        );
+function rmsOf(data) {
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
+    return Math.sqrt(sum / data.length);
+}
 
-    const highScore =
-        similarity(
-            reference.high,
-            user.high
-        );
+function compareVoice(referenceAudio, userAudio) {
 
+    const refRaw = referenceAudio.getChannelData(0);
+    const userRaw = userAudio.getChannelData(0);
+
+    const refData = trimSilence(refRaw, referenceAudio.sampleRate);
+    const userData = trimSilence(userRaw, userAudio.sampleRate);
+
+    // 1. Did user actually speak (loud enough)?
+    const userLoudEnough = rmsOf(userData) > 0.015;
+
+    if (!userLoudEnough) {
+        return 0;
+    }
+
+    // 2. Spectral shape comparison - this is what actually tells sounds apart
+    const refBands = getSpectrumBands(refData, referenceAudio.sampleRate);
+    const userBands = getSpectrumBands(userData, userAudio.sampleRate);
+    const spectralScore = Math.max(0, cosineSimilarity(refBands, userBands));
+
+    // 3. Duration match - very different length usually means wrong/incomplete sound
+    const refDuration = refData.length / referenceAudio.sampleRate;
+    const userDuration = userData.length / userAudio.sampleRate;
+    const durationRatio = Math.min(refDuration, userDuration) /
+                           Math.max(refDuration, userDuration, 0.01);
 
     const finalScore =
-        (
-            rmsScore * 0.15 +
-            zcrScore * 0.20 +
-            lowScore * 0.20 +
-            midScore * 0.25 +
-            highScore * 0.20
-        ) * 100;
+        (spectralScore * 0.75 +
+         durationRatio * 0.25) * 100;
 
-
-    return Math.round(
-        Math.max(
-            0,
-            Math.min(100, finalScore)
-        )
-    );
+    return Math.round(Math.max(0, Math.min(100, finalScore)));
 }
-    
+
+/* ---------------- END IMPROVED SECTION ---------------- */
+
 async function startRecording() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -283,98 +328,65 @@ async function startRecording() {
                 audioChunks.push(event.data);
             }
         };
-mediaRecorder.onstop = async function() {
 
-    const audioBlob = new Blob(audioChunks, {
-        type: "audio/webm"
-    });
+        mediaRecorder.onstop = async function() {
 
-    // Show user's recording
-    const audioURL = URL.createObjectURL(audioBlob);
+            const audioBlob = new Blob(audioChunks, {
+                type: "audio/webm"
+            });
 
-    const audio = document.createElement("audio");
-    audio.controls = true;
-    audio.src = audioURL;
+            const audioURL = URL.createObjectURL(audioBlob);
 
-    document.getElementById("myRecording").innerHTML = "";
-    document.getElementById("myRecording").appendChild(audio);
+            const audio = document.createElement("audio");
+            audio.controls = true;
+            audio.src = audioURL;
 
+            document.getElementById("myRecording").innerHTML = "";
+            document.getElementById("myRecording").appendChild(audio);
 
-    try {
+            try {
+                const response = await fetch("static/sounds/a_sound.mp3");
+                const referenceData = await response.arrayBuffer();
 
-        // 1. Get the reference A sound
-        const response =
-            await fetch("static/sounds/a_sound.mp3");
+                const userData = await audioBlob.arrayBuffer();
 
-        const referenceData =
-            await response.arrayBuffer();
+                const audioContext = new AudioContext();
 
-        // 2. Get user's recorded voice
-        const userData =
-            await audioBlob.arrayBuffer();
+                const referenceAudio = await audioContext.decodeAudioData(referenceData);
+                const userAudio = await audioContext.decodeAudioData(userData);
 
-        // 3. Decode both voices
-        const audioContext =
-            new AudioContext();
+                const score = compareVoice(referenceAudio, userAudio);
 
-        const referenceAudio =
-            await audioContext.decodeAudioData(
-                referenceData
-            );
+                showResult(score);
 
-        const userAudio =
-            await audioContext.decodeAudioData(
-                userData
-            );
+                await audioContext.close();
 
+            }
+            catch (error) {
+                console.log("Voice comparison error:", error);
+                document.getElementById("result").innerText = "Unable to compare voice.";
+            }
 
-        // 4. Compare both voices
-        const score =
-            compareVoice(
-                referenceAudio,
-                userAudio
-            );
+        };
 
+        mediaRecorder.start();
+        console.log("Recording started");
 
-        // 5. Show score and grade
-        showResult(score);
+        setTimeout(function() {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+            }
+            stream.getTracks().forEach(function(track) {
+                track.stop();
+            });
+            console.log("Microphone stopped");
+        }, 5000);
 
-        await audioContext.close();
-
+    } catch (error) {
+        console.log("Microphone error:", error);
     }
-    catch (error) {
-
-        console.log(
-            "Voice comparison error:",
-            error
-        );
-
-        document.getElementById("result").innerText =
-            "Unable to compare voice.";
-
-    }
-
-};
-mediaRecorder.start();
-
-console.log("Recording started");
-
-setTimeout(function() {
-    if (mediaRecorder && mediaRecorder.state === "recording") {
-        mediaRecorder.stop();
-    }
-
-    stream.getTracks().forEach(function(track) {
-        track.stop();
-    });
-
-    console.log("Microphone stopped");
-}, 5000);
-} catch (error) {
-    console.log("Microphone error:", error);
 }
-    
-}   
+
 function goToNext() {
     window.location.href = "/letter_b.html";
 }
