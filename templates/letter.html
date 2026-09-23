@@ -267,10 +267,11 @@ function spectrumOfFrame(frame, sampleRate, numBands, minFreq, maxFreq) {
 }
 
 // Averages the spectrum over the WHOLE clip (overlapping frames), not just
-// the first ~90ms. This is the main fix - previously only a random small
-// slice of the recording was ever analyzed.
-function getSpectrumBands(data, sampleRate, numBands = 8, maxFreq = 4000) {
-    const minFreq = 100;
+// the first ~90ms. Also computes the spectral centroid (roughly, where the
+// "center of mass" of the sound's energy sits in frequency) - this shifts a
+// LOT between different letter sounds/vowels and is a much stronger signal
+// for telling sounds apart than shape alone.
+function getAudioFeatures(data, sampleRate, numBands = 16, minFreq = 150, maxFreq = 3500) {
     const frameSize = nextPow2(Math.min(Math.max(data.length, 256), 2048));
     const hop = Math.floor(frameSize / 2); // 50% overlap
 
@@ -293,11 +294,29 @@ function getSpectrumBands(data, sampleRate, numBands = 8, maxFreq = 4000) {
 
     const avg = totals.map(v => v / frameCount);
 
-    // Log-compress magnitudes (closer to human hearing, less sensitive to
-    // raw loudness differences) then normalize so shape is what's compared
+    // Center frequency of each band (geometric mean of its edges)
+    const centers = [];
+    for (let b = 0; b < numBands; b++) {
+        const f1 = minFreq * Math.pow(maxFreq / minFreq, b / numBands);
+        const f2 = minFreq * Math.pow(maxFreq / minFreq, (b + 1) / numBands);
+        centers.push(Math.sqrt(f1 * f2));
+    }
+
+    // Spectral centroid - "where" the energy sits. This is the key feature
+    // that changes between different letter/vowel sounds.
+    let weightedSum = 0, energySum = 0;
+    for (let b = 0; b < numBands; b++) {
+        weightedSum += avg[b] * centers[b];
+        energySum += avg[b];
+    }
+    const centroid = energySum > 0 ? weightedSum / energySum : minFreq;
+
+    // Shape vector: log-compress (closer to human hearing) then normalize
     const compressed = avg.map(v => Math.log10(1 + v * 50));
     const total = compressed.reduce((a, b) => a + b, 0) || 1;
-    return compressed.map(v => v / total);
+    const shapeBands = compressed.map(v => v / total);
+
+    return { shapeBands, centroid };
 }
 
 function cosineSimilarity(a, b) {
@@ -330,14 +349,26 @@ function compareVoice(referenceAudio, userAudio) {
         return 0;
     }
 
-    // 2. Spectral shape comparison - this is what actually tells sounds apart
-    const refBands = getSpectrumBands(refData, referenceAudio.sampleRate);
-    const userBands = getSpectrumBands(userData, userAudio.sampleRate);
-    const spectralScore = Math.max(0, cosineSimilarity(refBands, userBands));
+    // 2. Extract features for both clips
+    const refFeat = getAudioFeatures(refData, referenceAudio.sampleRate);
+    const userFeat = getAudioFeatures(userData, userAudio.sampleRate);
 
-    // 3. Duration match - only penalize when WILDLY different (e.g. said a
-    // totally different long word vs a short "a" sound). sqrt softens the
-    // penalty since natural speaker-to-speaker timing varies a lot.
+    // 3. Spectral SHAPE match, sharpened. Raw cosine similarity between two
+    // human voices is almost always high (0.7-0.95) even for different
+    // sounds, so small real differences barely move the score. Cubing
+    // spreads that out so a genuine mismatch drops much further.
+    const rawShapeScore = Math.max(0, cosineSimilarity(refFeat.shapeBands, userFeat.shapeBands));
+    const shapeScore = Math.pow(rawShapeScore, 3);
+
+    // 4. Spectral CENTROID match - where the sound's energy actually sits.
+    // This shifts a lot between different letter/vowel sounds and is the
+    // strongest single signal for "is this actually the same sound".
+    const centroidRatio = Math.min(refFeat.centroid, userFeat.centroid) /
+                           Math.max(refFeat.centroid, userFeat.centroid, 1);
+    const centroidScore = Math.pow(centroidRatio, 2);
+
+    // 5. Duration match - softened, since natural timing varies a lot
+    // between speakers even for a correct, matching sound.
     const refDuration = refData.length / referenceAudio.sampleRate;
     const userDuration = userData.length / userAudio.sampleRate;
     const rawRatio = Math.min(refDuration, userDuration) /
@@ -345,8 +376,9 @@ function compareVoice(referenceAudio, userAudio) {
     const durationScore = Math.sqrt(rawRatio);
 
     const finalScore =
-        (spectralScore * 0.85 +
-         durationScore * 0.15) * 100;
+        (shapeScore * 0.40 +
+         centroidScore * 0.40 +
+         durationScore * 0.20) * 100;
 
     return Math.round(Math.max(0, Math.min(100, finalScore)));
 }
