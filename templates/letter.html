@@ -136,6 +136,40 @@ function showResult(score) {
         appreciation.innerText = "💪 Keep Practicing! Try again!";
     }
 }
+    function compareVoice(referenceAudio, userAudio) {
+
+    const refData = referenceAudio.getChannelData(0);
+    const userData = userAudio.getChannelData(0);
+
+    const length = Math.min(refData.length, userData.length);
+
+    let refEnergy = 0;
+    let userEnergy = 0;
+    let difference = 0;
+
+    for (let i = 0; i < length; i++) {
+        refEnergy += Math.abs(refData[i]);
+        userEnergy += Math.abs(userData[i]);
+    }
+
+    refEnergy = refEnergy / length;
+    userEnergy = userEnergy / length;
+
+    for (let i = 0; i < length; i++) {
+        const refValue = refData[i] / (refEnergy || 1);
+        const userValue = userData[i] / (userEnergy || 1);
+
+        difference += Math.abs(refValue - userValue);
+    }
+
+    difference = difference / length;
+
+    let score = 100 - (difference * 20);
+
+    score = Math.max(0, Math.min(100, score));
+
+    return Math.round(score);
+}
 async function startRecording() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
