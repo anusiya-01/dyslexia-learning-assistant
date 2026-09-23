@@ -87,16 +87,16 @@ body{
 <div id="appreciation"></div>
 
 <audio id="repeatSound">
-    <source src="sounds/a_repeat.mp3" type="audio/mpeg">
+    <source src="static/sounds/a_repeat.mp3" type="audio/mpeg">
 </audio>
     <audio id="aSound">
-        <source src="sounds/a_sound.mp3" type="audio/mp3">
+        <source src="static/sounds/a_sound.mp3" type="audio/mp3">
 </audio>
 
 <script>
 
 function playIntro() {
-    let audio = new Audio("sounds/a_intro.mp3");
+    let audio = new Audio("static/sounds/a_intro.mp3");
 
     audio.play();
 }
@@ -172,7 +172,7 @@ mediaRecorder.onstop = async function() {
 
         // 1. Get the reference A sound
         const response =
-            await fetch("sounds/a_sound.mp3");
+            await fetch("static/sounds/a_sound.mp3");
 
         const referenceData =
             await response.arrayBuffer();
@@ -257,12 +257,12 @@ function goToNext() {
     <h3>Pictures</h3>
 
     <div class="card">
-    <img src="images/apple.jpg" alt="Apple" >
+    <img src="static/images/apple.jpg" alt="Apple" >
     <p>Apple</p>
     </div>
 
     <div class="card">
-    <img src="images/ant.jpg" alt="Ant" >  
+    <img src="static/images/ant.jpg" alt="Ant" >  
     <p>Ant</p>
     </div>
 
