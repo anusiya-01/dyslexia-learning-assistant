@@ -64,6 +64,79 @@ body{
     animation: bounce 0.6s;
 }
 
+/* ---- Star popup for kids: stars fall in from above with a bounce ---- */
+.star-popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+}
+
+.star-popup-overlay.show {
+    display: flex;
+}
+
+.star-popup-box {
+    border: 6px solid brown;
+    border-radius: 30px;
+    padding: 25px 35px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    max-width: 320px;
+    transition: background 0.3s;
+}
+
+.star-popup-box.great {
+    background: linear-gradient(160deg, #FFF3B0, #FFD93D 70%);
+    border-color: #E8A800;
+}
+
+.star-popup-box.okay {
+    background: linear-gradient(160deg, #D4F4DD, #8DE3A6 70%);
+    border-color: #3CAA5C;
+}
+
+.star-popup-box.retry {
+    background: linear-gradient(160deg, #FFE0D6, #FFB199 70%);
+    border-color: #E06B4D;
+}
+
+.popup-face {
+    font-size: 60px;
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+.falling-star {
+    display: inline-block;
+    font-size: 55px;
+    opacity: 0;
+    transform: translateY(-250px) rotate(-30deg);
+    animation: starFall 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes starFall {
+    0%   { opacity: 0; transform: translateY(-250px) rotate(-30deg); }
+    70%  { opacity: 1; transform: translateY(15px) rotate(10deg); }
+    85%  { transform: translateY(-8px) rotate(-5deg); }
+    100% { opacity: 1; transform: translateY(0) rotate(0deg); }
+}
+
+.popup-close-btn {
+    margin-top: 10px;
+    background-color: brown;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    font-size: 26px;
+    cursor: pointer;
+}
+
         
     </style>
 
@@ -83,8 +156,15 @@ body{
 <button onclick="playSound()">🔊 Hear the Sound</button>
 <button onclick="startRecording()">🎤 Record My Voice</button>
 <div id="myRecording"></div>
-<div id="result"></div>
-<div id="appreciation"></div>
+<div id="stars" style="font-size: 40px; letter-spacing: 8px;"></div>
+
+<div id="starPopupOverlay" class="star-popup-overlay" onclick="closeStarPopup(event)">
+    <div id="popupBox" class="star-popup-box" onclick="event.stopPropagation()">
+        <div id="popupFace" class="popup-face"></div>
+        <div id="popupStars"></div>
+        <button class="popup-close-btn" onclick="closeStarPopup(event)">👍</button>
+    </div>
+</div>
 
 <audio id="repeatSound">
     <source src="static/sounds/a_repeat.mp3" type="audio/mpeg">
@@ -118,25 +198,60 @@ let recognition;
 let mediaRecorder;
 let audioChunks = [];
 
+function getStars(score) {
+    if (score >= 85) return 3;   // accurate / correct sound
+    if (score >= 60) return 2;   // close, somewhat matching
+    return 0;                    // wrong sound - no partial credit
+}
+
 function showResult(score) {
 
-    const result = document.getElementById("result");
-    const appreciation = document.getElementById("appreciation");
+    const starsDiv = document.getElementById("stars");
+    const totalStars = getStars(score);
 
-    result.innerText = "Score: " + score + "%";
+    starsDiv.innerText = "⭐".repeat(totalStars) + "☆".repeat(3 - totalStars);
 
-    if (score >= 85) {
-        appreciation.innerText = "🌟 Excellent! Perfect pronunciation!";
+    showStarPopup(totalStars);
+}
+
+function showStarPopup(totalStars) {
+    const overlay = document.getElementById("starPopupOverlay");
+    const popupBox = document.getElementById("popupBox");
+    const popupStars = document.getElementById("popupStars");
+    const popupFace = document.getElementById("popupFace");
+
+    popupBox.classList.remove("great", "okay", "retry");
+
+    let face;
+    if (totalStars === 3) {
+        face = "😃";
+        popupBox.classList.add("great");
     }
-    else if (score >= 70) {
-        appreciation.innerText = "👏 Very Good! Keep it up!";
-    }
-    else if (score >= 50) {
-        appreciation.innerText = "👍 Good Try! Practice once more!";
+    else if (totalStars === 2) {
+        face = "🙂";
+        popupBox.classList.add("okay");
     }
     else {
-        appreciation.innerText = "💪 Keep Practicing! Try again!";
+        face = "🤗";
+        popupBox.classList.add("retry");
     }
+    popupFace.textContent = face;
+
+    // 3 stars, each falls in one after another (staggered delay)
+    popupStars.innerHTML = "";
+    for (let i = 0; i < 3; i++) {
+        const span = document.createElement("span");
+        span.className = "falling-star";
+        span.style.animationDelay = (i * 0.25) + "s";
+        span.textContent = i < totalStars ? "⭐" : "☆";
+        popupStars.appendChild(span);
+    }
+
+    overlay.classList.add("show");
+}
+
+function closeStarPopup(event) {
+    document.getElementById("starPopupOverlay").classList.remove("show");
 }
 
 /* ---------------- IMPROVED VOICE COMPARISON ----------------
@@ -441,7 +556,6 @@ async function startRecording() {
             }
             catch (error) {
                 console.log("Voice comparison error:", error);
-                document.getElementById("result").innerText = "Unable to compare voice.";
             }
 
         };
