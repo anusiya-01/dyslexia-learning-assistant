@@ -130,16 +130,17 @@ body{
 .bg-sparkle {
     position: fixed;
     top: -40px;
-    font-size: 22px;
-    opacity: 0.85;
+    font-size: 34px;
+    opacity: 1;
+    filter: drop-shadow(0 0 6px gold) drop-shadow(0 0 10px orange);
     z-index: 998;
     pointer-events: none;
     animation: sparkleRain linear forwards;
 }
 
 @keyframes sparkleRain {
-    0%   { transform: translateY(0) rotate(0deg); opacity: 0.9; }
-    100% { transform: translateY(110vh) rotate(200deg); opacity: 0.2; }
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(200deg); opacity: 0.5; }
 }
 
 .popup-close-btn {
@@ -270,7 +271,7 @@ function showStarPopup(totalStars) {
 
 function spawnSparkleRain(totalStars) {
     const overlay = document.getElementById("starPopupOverlay");
-    const sparkles = totalStars === 3 ? "✨⭐🌟" : totalStars === 2 ? "✨⭐" : "✨";
+    const sparkles = totalStars === 3 ? "✨⭐🌟💛🧡" : totalStars === 2 ? "✨⭐💚🩵" : "✨💫";
     const count = 14;
 
     for (let i = 0; i < count; i++) {
