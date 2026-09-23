@@ -138,378 +138,134 @@ function showResult(score) {
 }
     function compareVoice(referenceAudio, userAudio) {
 
-    // Convert audio to mono
-    function toMono(audioBuffer) {
-        const length = audioBuffer.length;
-        const channels = audioBuffer.numberOfChannels;
+    function getFeatures(audioBuffer) {
 
-        const mono = new Float32Array(length);
+        const data = audioBuffer.getChannelData(0);
 
-        for (let ch = 0; ch < channels; ch++) {
-            const data = audioBuffer.getChannelData(ch);
+        let sum = 0;
+        let zeroCrossings = 0;
 
-            for (let i = 0; i < length; i++) {
-                mono[i] += data[i] / channels;
+        let low = 0;
+        let mid = 0;
+        let high = 0;
+
+        for (let i = 0; i < data.length; i++) {
+
+            const value = data[i];
+
+            sum += value * value;
+
+            if (i > 0) {
+                if (
+                    (data[i - 1] >= 0 && value < 0) ||
+                    (data[i - 1] < 0 && value >= 0)
+                ) {
+                    zeroCrossings++;
+                }
+            }
+
+            const frequencyPart =
+                Math.abs(value);
+
+            if (i % 3 === 0) {
+                low += frequencyPart;
+            }
+            else if (i % 3 === 1) {
+                mid += frequencyPart;
+            }
+            else {
+                high += frequencyPart;
             }
         }
 
-        return mono;
+        const rms =
+            Math.sqrt(sum / data.length);
+
+        const zcr =
+            zeroCrossings / data.length;
+
+        const total =
+            low + mid + high || 1;
+
+        return {
+            rms: rms,
+            zcr: zcr,
+            low: low / total,
+            mid: mid / total,
+            high: high / total
+        };
     }
 
 
-    // Create MFCC features
-    function getMFCC(audioBuffer) {
+    const reference =
+        getFeatures(referenceAudio);
 
-        const signal = toMono(audioBuffer);
-
-        const sampleRate = audioBuffer.sampleRate;
-
-        // Frame settings
-        const frameSize = Math.floor(sampleRate * 0.025);
-        const frameStep = Math.floor(sampleRate * 0.010);
-
-        const frames = [];
-
-        for (
-            let start = 0;
-            start + frameSize <= signal.length;
-            start += frameStep
-        ) {
-
-            const frame = new Float32Array(frameSize);
-
-            for (let i = 0; i < frameSize; i++) {
-
-                // Hamming window
-                const window =
-                    0.54 -
-                    0.46 *
-                    Math.cos(
-                        (2 * Math.PI * i) /
-                        (frameSize - 1)
-                    );
-
-                frame[i] = signal[start + i] * window;
-            }
-
-            frames.push(frame);
-        }
+    const user =
+        getFeatures(userAudio);
 
 
-        // Frequency spectrum
-        function getSpectrum(frame) {
+    function similarity(a, b) {
 
-            const N = frame.length;
+        const difference =
+            Math.abs(a - b);
 
-            const spectrum =
-                new Float32Array(Math.floor(N / 2));
+        const maximum =
+            Math.max(Math.abs(a), Math.abs(b), 0.000001);
 
-            for (let k = 0; k < spectrum.length; k++) {
-
-                let real = 0;
-                let imag = 0;
-
-                for (let n = 0; n < N; n++) {
-
-                    const angle =
-                        (2 * Math.PI * k * n) / N;
-
-                    real +=
-                        frame[n] *
-                        Math.cos(angle);
-
-                    imag -=
-                        frame[n] *
-                        Math.sin(angle);
-                }
-
-                spectrum[k] =
-                    Math.sqrt(
-                        real * real +
-                        imag * imag
-                    );
-            }
-
-            return spectrum;
-        }
+        return Math.max(
+            0,
+            1 - (difference / maximum)
+        );
+    }
 
 
-        // Convert frequency to Mel
-        function hzToMel(hz) {
-            return 2595 *
-                Math.log10(1 + hz / 700);
-        }
+    const rmsScore =
+        similarity(
+            reference.rms,
+            user.rms
+        );
 
+    const zcrScore =
+        similarity(
+            reference.zcr,
+            user.zcr
+        );
 
-        // Convert Mel to frequency
-        function melToHz(mel) {
-            return 700 *
-                (Math.pow(10, mel / 2595) - 1);
-        }
+    const lowScore =
+        similarity(
+            reference.low,
+            user.low
+        );
 
+    const midScore =
+        similarity(
+            reference.mid,
+            user.mid
+        );
 
-        // Create Mel filter banks
-        const filterCount = 20;
-
-        const lowMel = hzToMel(300);
-        const highMel =
-            hzToMel(sampleRate / 2);
-
-        const melPoints = [];
-
-        for (let i = 0; i < filterCount + 2; i++) {
-
-            const mel =
-                lowMel +
-                (highMel - lowMel) *
-                i /
-                (filterCount + 1);
-
-            melPoints.push(
-                melToHz(mel)
-            );
-        }
-
-
-        const filterBins = melPoints.map(
-            frequency =>
-                Math.floor(
-                    (frameSize + 1) *
-                    frequency /
-                    sampleRate
-                )
+    const highScore =
+        similarity(
+            reference.high,
+            user.high
         );
 
 
-        const mfccFrames = [];
-
-
-        // MFCC calculation
-        for (const frame of frames) {
-
-            const spectrum =
-                getSpectrum(frame);
-
-            const energies = [];
-
-
-            for (let m = 0; m < filterCount; m++) {
-
-                const left =
-                    filterBins[m];
-
-                const center =
-                    filterBins[m + 1];
-
-                const right =
-                    filterBins[m + 2];
-
-                let energy = 0;
-
-
-                for (
-                    let k = left;
-                    k < center;
-                    k++
-                ) {
-
-                    if (
-                        k >= 0 &&
-                        k < spectrum.length
-                    ) {
-
-                        const weight =
-                            (k - left) /
-                            Math.max(1, center - left);
-
-                        energy +=
-                            spectrum[k] *
-                            weight;
-                    }
-                }
-
-
-                for (
-                    let k = center;
-                    k < right;
-                    k++
-                ) {
-
-                    if (
-                        k >= 0 &&
-                        k < spectrum.length
-                    ) {
-
-                        const weight =
-                            (right - k) /
-                            Math.max(1, right - center);
-
-                        energy +=
-                            spectrum[k] *
-                            weight;
-                    }
-                }
-
-
-                energies.push(
-                    Math.log(
-                        Math.max(
-                            energy,
-                            0.000001
-                        )
-                    )
-                );
-            }
-
-
-            // DCT
-            const coefficients = [];
-
-            const coefficientCount = 13;
-
-            for (
-                let c = 0;
-                c < coefficientCount;
-                c++
-            ) {
-
-                let sum = 0;
-
-                for (
-                    let m = 0;
-                    m < filterCount;
-                    m++
-                ) {
-
-                    sum +=
-                        energies[m] *
-                        Math.cos(
-                            Math.PI *
-                            c *
-                            (m + 0.5) /
-                            filterCount
-                        );
-                }
-
-                coefficients.push(sum);
-            }
-
-            mfccFrames.push(coefficients);
-        }
-
-
-        return mfccFrames;
-    }
-
-
-    // Get MFCC from reference and user voice
-    const referenceMFCC =
-        getMFCC(referenceAudio);
-
-    const userMFCC =
-        getMFCC(userAudio);
-
-
-    if (
-        referenceMFCC.length === 0 ||
-        userMFCC.length === 0
-    ) {
-        return 0;
-    }
-
-
-    // Distance between two MFCC frames
-    function frameDistance(a, b) {
-
-        let distance = 0;
-
-        for (let i = 0; i < a.length; i++) {
-
-            const difference =
-                a[i] - b[i];
-
-            distance +=
-                difference * difference;
-        }
-
-        return Math.sqrt(distance);
-    }
-
-
-    // Dynamic Time Warping
-    const rows =
-        referenceMFCC.length;
-
-    const cols =
-        userMFCC.length;
-
-
-    const dtw =
-        Array.from(
-            { length: rows + 1 },
-            () =>
-                new Float64Array(
-                    cols + 1
-                )
-        );
-
-
-    for (let i = 0; i <= rows; i++) {
-
-        dtw[i].fill(Infinity);
-    }
-
-    dtw[0][0] = 0;
-
-
-    for (let i = 1; i <= rows; i++) {
-
-        for (let j = 1; j <= cols; j++) {
-
-            const distance =
-                frameDistance(
-                    referenceMFCC[i - 1],
-                    userMFCC[j - 1]
-                );
-
-
-            dtw[i][j] =
-                distance +
-                Math.min(
-                    dtw[i - 1][j],
-                    dtw[i][j - 1],
-                    dtw[i - 1][j - 1]
-                );
-        }
-    }
-
-
-    // Average DTW distance
-    const averageDistance =
-        dtw[rows][cols] /
-        (rows + cols);
-
-
-    // Convert distance to percentage
-    let score =
-        100 *
-        Math.exp(
-            -averageDistance / 10
-        );
-
-
-    // Keep score between 0 and 100
-    score =
+    const finalScore =
+        (
+            rmsScore * 0.15 +
+            zcrScore * 0.20 +
+            lowScore * 0.20 +
+            midScore * 0.25 +
+            highScore * 0.20
+        ) * 100;
+
+
+    return Math.round(
         Math.max(
             0,
-            Math.min(
-                100,
-                score
-            )
-        );
-
-
-    return Math.round(score);
+            Math.min(100, finalScore)
+        )
+    );
 }
     
 async function startRecording() {
