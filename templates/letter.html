@@ -152,8 +152,17 @@ function showResult(score) {
    5. Also factors in duration match and whether user actually spoke
 ------------------------------------------------------------- */
 
-function trimSilence(data, sampleRate, threshold = 0.02) {
+function trimSilence(data, sampleRate) {
     const frameSize = Math.floor(sampleRate * 0.02); // 20ms frames
+
+    // Adaptive threshold: relative to this clip's own peak, not a fixed
+    // number. Fixed thresholds break when mic gain/volume differs.
+    let peak = 0;
+    for (let i = 0; i < data.length; i++) {
+        peak = Math.max(peak, Math.abs(data[i]));
+    }
+    const threshold = Math.max(peak * 0.15, 0.005);
+
     let start = 0;
     let end = data.length;
 
@@ -219,21 +228,20 @@ function fft(re, im) {
     }
 }
 
-function getSpectrumBands(data, sampleRate, numBands = 12, maxFreq = 5000) {
-    const frameLength = nextPow2(Math.min(data.length, 4096));
-    const re = new Float64Array(frameLength);
-    const im = new Float64Array(frameLength);
+// Computes the spectrum of ONE frame (windowed FFT -> log-spaced bands)
+function spectrumOfFrame(frame, sampleRate, numBands, minFreq, maxFreq) {
+    const n = frame.length;
+    const re = new Float64Array(n);
+    const im = new Float64Array(n);
 
-    for (let i = 0; i < frameLength; i++) {
-        const sample = i < data.length ? data[i] : 0;
-        // Hamming window reduces edge artifacts
-        const w = 0.54 - 0.46 * Math.cos((2 * Math.PI * i) / (frameLength - 1));
-        re[i] = sample * w;
+    for (let i = 0; i < n; i++) {
+        const w = 0.54 - 0.46 * Math.cos((2 * Math.PI * i) / (n - 1));
+        re[i] = frame[i] * w;
     }
 
     fft(re, im);
 
-    const half = frameLength / 2;
+    const half = n / 2;
     const magnitude = new Float64Array(half);
     for (let i = 0; i < half; i++) {
         magnitude[i] = Math.sqrt(re[i] * re[i] + im[i] * im[i]);
@@ -241,7 +249,6 @@ function getSpectrumBands(data, sampleRate, numBands = 12, maxFreq = 5000) {
 
     const bands = new Array(numBands).fill(0);
     const nyquist = sampleRate / 2;
-    const minFreq = 80;
 
     for (let b = 0; b < numBands; b++) {
         const f1 = minFreq * Math.pow(maxFreq / minFreq, b / numBands);
@@ -256,9 +263,41 @@ function getSpectrumBands(data, sampleRate, numBands = 12, maxFreq = 5000) {
         bands[b] = count > 0 ? sum / count : 0;
     }
 
-    // Normalize so overall loudness doesn't dominate - we want SHAPE match
-    const total = bands.reduce((a, b) => a + b, 0) || 1;
-    return bands.map(v => v / total);
+    return bands;
+}
+
+// Averages the spectrum over the WHOLE clip (overlapping frames), not just
+// the first ~90ms. This is the main fix - previously only a random small
+// slice of the recording was ever analyzed.
+function getSpectrumBands(data, sampleRate, numBands = 8, maxFreq = 4000) {
+    const minFreq = 100;
+    const frameSize = nextPow2(Math.min(Math.max(data.length, 256), 2048));
+    const hop = Math.floor(frameSize / 2); // 50% overlap
+
+    const totals = new Array(numBands).fill(0);
+    let frameCount = 0;
+
+    for (let start = 0; start + frameSize <= data.length || frameCount === 0; start += hop) {
+        const frame = new Float64Array(frameSize);
+        for (let i = 0; i < frameSize; i++) {
+            const idx = start + i;
+            frame[i] = idx < data.length ? data[idx] : 0;
+        }
+
+        const bands = spectrumOfFrame(frame, sampleRate, numBands, minFreq, maxFreq);
+        for (let b = 0; b < numBands; b++) totals[b] += bands[b];
+        frameCount++;
+
+        if (start + frameSize >= data.length) break;
+    }
+
+    const avg = totals.map(v => v / frameCount);
+
+    // Log-compress magnitudes (closer to human hearing, less sensitive to
+    // raw loudness differences) then normalize so shape is what's compared
+    const compressed = avg.map(v => Math.log10(1 + v * 50));
+    const total = compressed.reduce((a, b) => a + b, 0) || 1;
+    return compressed.map(v => v / total);
 }
 
 function cosineSimilarity(a, b) {
@@ -286,10 +325,8 @@ function compareVoice(referenceAudio, userAudio) {
     const refData = trimSilence(refRaw, referenceAudio.sampleRate);
     const userData = trimSilence(userRaw, userAudio.sampleRate);
 
-    // 1. Did user actually speak (loud enough)?
-    const userLoudEnough = rmsOf(userData) > 0.015;
-
-    if (!userLoudEnough) {
+    // 1. Did user actually speak at all (near-total silence)?
+    if (rmsOf(userData) < 0.004 || userData.length < userAudio.sampleRate * 0.05) {
         return 0;
     }
 
@@ -298,15 +335,18 @@ function compareVoice(referenceAudio, userAudio) {
     const userBands = getSpectrumBands(userData, userAudio.sampleRate);
     const spectralScore = Math.max(0, cosineSimilarity(refBands, userBands));
 
-    // 3. Duration match - very different length usually means wrong/incomplete sound
+    // 3. Duration match - only penalize when WILDLY different (e.g. said a
+    // totally different long word vs a short "a" sound). sqrt softens the
+    // penalty since natural speaker-to-speaker timing varies a lot.
     const refDuration = refData.length / referenceAudio.sampleRate;
     const userDuration = userData.length / userAudio.sampleRate;
-    const durationRatio = Math.min(refDuration, userDuration) /
-                           Math.max(refDuration, userDuration, 0.01);
+    const rawRatio = Math.min(refDuration, userDuration) /
+                      Math.max(refDuration, userDuration, 0.01);
+    const durationScore = Math.sqrt(rawRatio);
 
     const finalScore =
-        (spectralScore * 0.75 +
-         durationRatio * 0.25) * 100;
+        (spectralScore * 0.85 +
+         durationScore * 0.15) * 100;
 
     return Math.round(Math.max(0, Math.min(100, finalScore)));
 }
