@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Letter A Learning</title>
 
@@ -83,19 +83,20 @@ body{
 <button onclick="playSound()">🔊 Hear the Sound</button>
 <button onclick="startRecording()">🎤 Record My Voice</button>
 <div id="myRecording"></div>
+<div id="result"></div>
+<div id="appreciation"></div>
 
 <audio id="repeatSound">
-    <source src="{{ url_for('static', filename='sounds/a_repeat.mp3') }}" type="audio/mpeg">
+    <source src="sounds/a_repeat.mp3" type="audio/mpeg">
 </audio>
     <audio id="aSound">
-        <source src="{{ url_for('static', filename='sounds/a_sound.mp3')}}" type="audio/mp3"></audio>
+        <source src="sounds/a_sound.mp3" type="audio/mp3">
+</audio>
 
 <script>
 
 function playIntro() {
-    let audio = new Audio(
-        "{{ url_for('static', filename='sounds/a_intro.mp3') }}"
-    );
+    let audio = new Audio("sounds/a_intro.mp3");
 
     audio.play();
 }
@@ -105,6 +106,7 @@ function playSound() {
     let letter = document.querySelector(".letter");
 
     audio.currentTime = 0;
+    audio.volume = 1.0;
     audio.play();
 
     letter.classList.remove("animate");
@@ -114,6 +116,26 @@ function playSound() {
 let recognition;
 let mediaRecorder;
 let audioChunks = [];
+function showResult(score) {
+
+    const result = document.getElementById("result");
+    const appreciation = document.getElementById("appreciation");
+
+    result.innerText = "Score: " + score + "%";
+
+    if (score >= 90) {
+        appreciation.innerText = "🌟 Excellent! Perfect pronunciation!";
+    }
+    else if (score >= 80) {
+        appreciation.innerText = "👏 Very Good! Keep it up!";
+    }
+    else if (score >= 60) {
+        appreciation.innerText = "👍 Good Try! Practice once more!";
+    }
+    else {
+        appreciation.innerText = "💪 Keep Practicing! Try again!";
+    }
+}
 async function startRecording() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -129,55 +151,104 @@ async function startRecording() {
                 audioChunks.push(event.data);
             }
         };
+mediaRecorder.onstop = async function() {
 
-        mediaRecorder.onstop = function() {
-            const audioBlob = new Blob(audioChunks, {
-                type: "audio/webm"
-            });
+    const audioBlob = new Blob(audioChunks, {
+        type: "audio/webm"
+    });
 
-            const audioURL = URL.createObjectURL(audioBlob);
+    // Show user's recording
+    const audioURL = URL.createObjectURL(audioBlob);
 
-            const audio = document.createElement("audio");
-            audio.controls = true;
-            audio.src = audioURL;
+    const audio = document.createElement("audio");
+    audio.controls = true;
+    audio.src = audioURL;
 
-            document.getElementById("myRecording").innerHTML = "";
-            document.getElementById("myRecording").appendChild(audio);
-        };
+    document.getElementById("myRecording").innerHTML = "";
+    document.getElementById("myRecording").appendChild(audio);
 
-        mediaRecorder.start();
 
-        console.log("Recording started");
+    try {
 
-        setTimeout(function() {
+        // 1. Get the reference A sound
+        const response =
+            await fetch("sounds/a_sound.mp3");
 
-            // First stop recording
-            if (mediaRecorder && mediaRecorder.state === "recording") {
-                mediaRecorder.stop();
-            }
+        const referenceData =
+            await response.arrayBuffer();
 
-            // IMPORTANT: stop microphone
-            stream.getTracks().forEach(function(track) {
-                track.stop();
-            });
+        // 2. Get user's recorded voice
+        const userData =
+            await audioBlob.arrayBuffer();
 
-            console.log("Microphone stopped");
+        // 3. Decode both voices
+        const audioContext =
+            new AudioContext();
 
-        }, 5000);
+        const referenceAudio =
+            await audioContext.decodeAudioData(
+                referenceData
+            );
 
-    } catch (error) {
-        console.log("Microphone error:", error);
+        const userAudio =
+            await audioContext.decodeAudioData(
+                userData
+            );
+
+
+        // 4. Compare both voices
+        const score =
+            compareVoice(
+                referenceAudio,
+                userAudio
+            );
+
+
+        // 5. Show score and grade
+        showResult(score);
+
+        await audioContext.close();
+
     }
-}
+    catch (error) {
 
+        console.log(
+            "Voice comparison error:",
+            error
+        );
+
+        document.getElementById("result").innerText =
+            "Unable to compare voice.";
+
+    }
+
+};
+mediaRecorder.start();
+
+console.log("Recording started");
+
+setTimeout(function() {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+    }
+
+    stream.getTracks().forEach(function(track) {
+        track.stop();
+    });
+
+    console.log("Microphone stopped");
+}, 5000);
+} catch (error) {
+    console.log("Microphone error:", error);
+}
+    
+}   
 function goToNext() {
-    window.location.href = "/letter_b";
+    window.location.href = "/letter_b.html";
 }
 
 </script>
 
-
-    
 
 
 
@@ -186,12 +257,12 @@ function goToNext() {
     <h3>Pictures</h3>
 
     <div class="card">
-    <img src="{{ url_for('static', filename='images/apple.jpg') }}" >
+    <img src="images/apple.jpg" alt="Apple" >
     <p>Apple</p>
     </div>
 
     <div class="card">
-    <img src="{{ url_for('static', filename='images/ant.jpg') }}" >   
+    <img src="images/ant.jpg" alt="Ant" >  
     <p>Ant</p>
     </div>
 
