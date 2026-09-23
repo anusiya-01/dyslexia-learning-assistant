@@ -132,10 +132,24 @@ body{
     top: -40px;
     font-size: 34px;
     opacity: 1;
-    filter: drop-shadow(0 0 6px gold) drop-shadow(0 0 10px orange);
     z-index: 998;
     pointer-events: none;
     animation: sparkleRain linear forwards;
+}
+
+.bg-sparkle.tier-great {
+    color: #880E4F;
+    filter: drop-shadow(0 0 6px #C2185B);
+}
+
+.bg-sparkle.tier-okay {
+    color: #AD1457;
+    filter: drop-shadow(0 0 6px #E91E63);
+}
+
+.bg-sparkle.tier-retry {
+    color: #D81B60;
+    filter: drop-shadow(0 0 6px #F06292);
 }
 
 @keyframes sparkleRain {
@@ -271,14 +285,13 @@ function showStarPopup(totalStars) {
 
 function spawnSparkleRain(totalStars) {
     const overlay = document.getElementById("starPopupOverlay");
-    const sparkles = totalStars === 3 ? ["✨", "⭐", "🌟", "💫"]
-                    : totalStars === 2 ? ["✨", "⭐", "💫"]
-                    : ["✨", "💫"];
+    const sparkles = ["★", "✦", "✧", "✩"];
+    const tierClass = totalStars === 3 ? "tier-great" : totalStars === 2 ? "tier-okay" : "tier-retry";
     const count = 14;
 
     for (let i = 0; i < count; i++) {
         const s = document.createElement("span");
-        s.className = "bg-sparkle";
+        s.className = "bg-sparkle " + tierClass;
         s.textContent = sparkles[Math.floor(Math.random() * sparkles.length)];
         s.style.left = Math.random() * 100 + "vw";
         s.style.animationDuration = (2 + Math.random() * 1.5) + "s";
