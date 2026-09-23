@@ -125,13 +125,13 @@ function showResult(score) {
 
     result.innerText = "Score: " + score + "%";
 
-    if (score >= 80) {
+    if (score >= 85) {
         appreciation.innerText = "🌟 Excellent! Perfect pronunciation!";
     }
-    else if (score >= 65) {
+    else if (score >= 70) {
         appreciation.innerText = "👏 Very Good! Keep it up!";
     }
-    else if (score >= 45) {
+    else if (score >= 50) {
         appreciation.innerText = "👍 Good Try! Practice once more!";
     }
     else {
@@ -353,19 +353,15 @@ function compareVoice(referenceAudio, userAudio) {
     const refFeat = getAudioFeatures(refData, referenceAudio.sampleRate);
     const userFeat = getAudioFeatures(userData, userAudio.sampleRate);
 
-    // 3. Spectral SHAPE match, sharpened. Raw cosine similarity between two
-    // human voices is almost always high (0.7-0.95) even for different
-    // sounds, so small real differences barely move the score. Cubing
-    // spreads that out so a genuine mismatch drops much further.
+    // 3. Spectral SHAPE match, sharpened.
     const rawShapeScore = Math.max(0, cosineSimilarity(refFeat.shapeBands, userFeat.shapeBands));
     const shapeScore = Math.pow(rawShapeScore, 3);
 
     // 4. Spectral CENTROID match - where the sound's energy actually sits.
-    // This shifts a lot between different letter/vowel sounds and is the
-    // strongest single signal for "is this actually the same sound".
+    // This is the strongest single signal for "is this actually the same
+    // sound" - a wrong letter/vowel almost always shifts this noticeably.
     const centroidRatio = Math.min(refFeat.centroid, userFeat.centroid) /
                            Math.max(refFeat.centroid, userFeat.centroid, 1);
-    const centroidScore = Math.pow(centroidRatio, 2);
 
     // 5. Duration match - softened, since natural timing varies a lot
     // between speakers even for a correct, matching sound.
@@ -375,10 +371,19 @@ function compareVoice(referenceAudio, userAudio) {
                       Math.max(refDuration, userDuration, 0.01);
     const durationScore = Math.sqrt(rawRatio);
 
-    const finalScore =
-        (shapeScore * 0.40 +
-         centroidScore * 0.40 +
-         durationScore * 0.20) * 100;
+    // Base score from shape + duration
+    const baseScore = shapeScore * 0.75 + durationScore * 0.25;
+
+    // GATE: if the centroid doesn't line up well, that's a strong sign it's
+    // a genuinely different sound - punish sharply and multiplicatively so
+    // good duration/shape alone can't fake a high score. If centroid lines
+    // up well (>= 0.85 ratio), no penalty is applied at all.
+    const CENTROID_CUTOFF = 0.85;
+    const centroidPenalty = centroidRatio >= CENTROID_CUTOFF
+        ? 1
+        : Math.pow(centroidRatio / CENTROID_CUTOFF, 4);
+
+    const finalScore = baseScore * centroidPenalty * 100;
 
     return Math.round(Math.max(0, Math.min(100, finalScore)));
 }
