@@ -346,7 +346,7 @@ function spectrumOfFrame(frame, sampleRate, numBands, minFreq, maxFreq) {
     return bands;
 }
 
-function getAudioFeatures(data, sampleRate, numBands = 16, minFreq = 150, maxFreq = 7000) {
+function getAudioFeatures(data, sampleRate, numBands = 16, minFreq = 150, maxFreq = 3500) {
     const frameSize = nextPow2(Math.min(Math.max(data.length, 256), 2048));
     const hop = Math.floor(frameSize / 2);
 
