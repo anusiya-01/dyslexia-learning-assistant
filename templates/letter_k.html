@@ -34,37 +34,130 @@
             margin: 20px;
             display: inline-block;
         }
+
         button {
-    background-color: brown;
-    color: white;
-    font-size: 18px;
-    font-weight: bold;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    margin: 20px;
-}
+            background-color: brown;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 20px;
+        }
 
-button:hover {
-    background-color: brown;
-}
-body{
-    background-color:#FFF8DC;
-    text-align:center;
-    font-family:Arial, sans-serif;
-}
-@keyframes bounce {
-    0%   { transform: translateY(0); }
-    50%  { transform: translateY(-10px); }
-    100% { transform: translateY(0); }
-}
+        button:hover {
+            background-color: brown;
+        }
 
-.animate {
-    animation: bounce 0.6s;
-}
+        body {
+            background-color:#FFF8DC;
+            text-align:center;
+            font-family:Arial, sans-serif;
+        }
 
-        
+        @keyframes bounce {
+            0%   { transform: translateY(0); }
+            50%  { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        .animate {
+            animation: bounce 0.6s;
+        }
+
+        /* ⭐ Star Popup */
+        #starPopupOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.45);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #popupBox {
+            background: white;
+            width: 330px;
+            padding: 30px;
+            border-radius: 25px;
+            text-align: center;
+            position: relative;
+            z-index: 10001;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        #popupFace {
+            font-size: 70px;
+        }
+
+        #popupStars {
+            font-size: 42px;
+            margin: 15px;
+        }
+
+        #popupMessage {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px;
+        }
+
+        #closePopup {
+            background: brown;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        .fallingStar {
+            position: absolute;
+            top: -60px;
+            font-size: 35px;
+            animation: fallStar 3s linear forwards;
+            z-index: 10000;
+        }
+
+        @keyframes fallStar {
+            0% {
+                transform: translateY(-60px) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .sparkle {
+            position: absolute;
+            top: -30px;
+            font-size: 25px;
+            animation: sparkleFall 2.5s linear forwards;
+            z-index: 10000;
+        }
+
+        @keyframes sparkleFall {
+            0% {
+                transform: translateY(-30px);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+        }
+
     </style>
 
 </head>
@@ -80,13 +173,17 @@ body{
 <button onclick="playIntro()">🔤 This is Letter K</button>
 <button onclick="playSound()">🔊 Hear the Sound</button>
 <button onclick="startRecording()">🎤 Record My Voice</button>
+
 <div id="myRecording"></div>
 
 <audio id="repeatSound">
     <source src="{{ url_for('static', filename='sounds/k_repeat.mp3') }}" type="audio/mpeg">
 </audio>
-    <audio id="kSound">
-        <source src="{{ url_for('static', filename='sounds/k_sound.mp3')}}" type="audio/mpeg"></audio>
+
+<audio id="kSound">
+    <source src="{{ url_for('static', filename='sounds/k_sound.mp3')}}" type="audio/mpeg">
+</audio>
+
 
 <script>
 
@@ -97,6 +194,7 @@ function playIntro() {
 
     audio.play();
 }
+
 
 function playSound() {
     let audio = document.getElementById("kSound");
@@ -109,89 +207,794 @@ function playSound() {
     void letter.offsetWidth;
     letter.classList.add("animate");
 }
-let recognition;
-let mediaRecorder;
-let audioChunks = [];
-async function startRecording() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            audio: true
-        });
 
-        audioChunks = [];
 
-        mediaRecorder = new MediaRecorder(stream);
+/* =========================================================
+   VOICE COMPARISON ALGORITHM
+   Audio Features + Cosine Similarity
+   ========================================================= */
 
-        mediaRecorder.ondataavailable = function(event) {
-            if (event.data.size > 0) {
-                audioChunks.push(event.data);
+function trimSilence(buffer) {
+
+    const data = buffer.getChannelData(0);
+
+    let threshold = 0.01;
+
+    let start = 0;
+    let end = data.length - 1;
+
+    while (start < data.length && Math.abs(data[start]) < threshold) {
+        start++;
+    }
+
+    while (end > start && Math.abs(data[end]) < threshold) {
+        end--;
+    }
+
+    if (start >= end) {
+        return buffer;
+    }
+
+    const length = end - start + 1;
+
+    const newBuffer = new AudioContext().createBuffer(
+        1,
+        length,
+        buffer.sampleRate
+    );
+
+    const newData = newBuffer.getChannelData(0);
+
+    for (let i = 0; i < length; i++) {
+        newData[i] = data[start + i];
+    }
+
+    return newBuffer;
+}
+
+
+function nextPow2(value) {
+
+    let n = 1;
+
+    while (n < value) {
+        n *= 2;
+    }
+
+    return n;
+}
+
+
+/* Simple FFT */
+
+function fft(real, imag) {
+
+    const n = real.length;
+
+    let j = 0;
+
+    for (let i = 0; i < n; i++) {
+
+        if (i < j) {
+
+            let temp = real[i];
+            real[i] = real[j];
+            real[j] = temp;
+
+            temp = imag[i];
+            imag[i] = imag[j];
+            imag[j] = temp;
+        }
+
+        let m = n >> 1;
+
+        while (m >= 1 && j >= m) {
+            j -= m;
+            m >>= 1;
+        }
+
+        j += m;
+    }
+
+    for (let len = 2; len <= n; len <<= 1) {
+
+        let angle = -2 * Math.PI / len;
+
+        let wlenCos = Math.cos(angle);
+        let wlenSin = Math.sin(angle);
+
+        for (let i = 0; i < n; i += len) {
+
+            let wCos = 1;
+            let wSin = 0;
+
+            for (let k = 0; k < len / 2; k++) {
+
+                let uReal = real[i + k];
+                let uImag = imag[i + k];
+
+                let vReal =
+                    real[i + k + len / 2] * wCos -
+                    imag[i + k + len / 2] * wSin;
+
+                let vImag =
+                    real[i + k + len / 2] * wSin +
+                    imag[i + k + len / 2] * wCos;
+
+                real[i + k] = uReal + vReal;
+                imag[i + k] = uImag + vImag;
+
+                real[i + k + len / 2] = uReal - vReal;
+                imag[i + k + len / 2] = uImag - vImag;
+
+                let tempCos =
+                    wCos * wlenCos -
+                    wSin * wlenSin;
+
+                wSin =
+                    wCos * wlenSin +
+                    wSin * wlenCos;
+
+                wCos = tempCos;
             }
-        };
+        }
+    }
+}
 
-        mediaRecorder.onstop = function() {
-            const audioBlob = new Blob(audioChunks, {
-                type: "audio/webm"
-            });
 
-            const audioURL = URL.createObjectURL(audioBlob);
+/* Get frequency spectrum */
 
-            const audio = document.createElement("audio");
-            audio.controls = true;
-            audio.src = audioURL;
+function spectrumOfFrame(frame) {
 
-            document.getElementById("myRecording").innerHTML = "";
-            document.getElementById("myRecording").appendChild(audio);
-        };
+    const size = nextPow2(frame.length);
 
-        mediaRecorder.start();
+    const real = new Float32Array(size);
+    const imag = new Float32Array(size);
 
-        console.log("Recording started");
+    for (let i = 0; i < frame.length; i++) {
+
+        /* Hann window */
+        const window =
+            0.5 -
+            0.5 * Math.cos(
+                2 * Math.PI * i / (frame.length - 1)
+            );
+
+        real[i] = frame[i] * window;
+    }
+
+    fft(real, imag);
+
+    const spectrum = new Float32Array(size / 2);
+
+    for (let i = 0; i < spectrum.length; i++) {
+
+        spectrum[i] =
+            Math.sqrt(
+                real[i] * real[i] +
+                imag[i] * imag[i]
+            );
+    }
+
+    return spectrum;
+}
+
+
+/* Extract audio features */
+
+function getAudioFeatures(buffer) {
+
+    const trimmed = trimSilence(buffer);
+
+    const data = trimmed.getChannelData(0);
+
+    const sampleRate = trimmed.sampleRate;
+
+    const frameSize = 2048;
+
+    const hopSize = 1024;
+
+    let spectralFeatures = [];
+
+    let centroidSum = 0;
+
+    let frames = 0;
+
+    for (
+        let start = 0;
+        start + frameSize <= data.length;
+        start += hopSize
+    ) {
+
+        const frame = data.slice(
+            start,
+            start + frameSize
+        );
+
+        const spectrum = spectrumOfFrame(frame);
+
+        let magnitudeSum = 0;
+
+        let weightedFrequency = 0;
+
+        for (let i = 0; i < spectrum.length; i++) {
+
+            const magnitude = spectrum[i];
+
+            magnitudeSum += magnitude;
+
+            const frequency =
+                i * sampleRate / (spectrum.length * 2);
+
+            weightedFrequency +=
+                frequency * magnitude;
+        }
+
+        const centroid =
+            magnitudeSum > 0
+                ? weightedFrequency / magnitudeSum
+                : 0;
+
+        centroidSum += centroid;
+
+        frames++;
+
+        /* Spectral bands */
+
+        let bands = [0, 0, 0, 0, 0];
+
+        for (let i = 0; i < spectrum.length; i++) {
+
+            const frequency =
+                i * sampleRate / (spectrum.length * 2);
+
+            if (frequency < 500) {
+                bands[0] += spectrum[i];
+            }
+            else if (frequency < 1000) {
+                bands[1] += spectrum[i];
+            }
+            else if (frequency < 2000) {
+                bands[2] += spectrum[i];
+            }
+            else if (frequency < 4000) {
+                bands[3] += spectrum[i];
+            }
+            else {
+                bands[4] += spectrum[i];
+            }
+        }
+
+        spectralFeatures.push(...bands);
+    }
+
+
+    /* Average spectral features */
+
+    if (frames > 0) {
+
+        for (let i = 0; i < spectralFeatures.length; i++) {
+            spectralFeatures[i] /= frames;
+        }
+    }
+
+
+    /* RMS */
+
+    let sum = 0;
+
+    for (let i = 0; i < data.length; i++) {
+        sum += data[i] * data[i];
+    }
+
+    const rms =
+        Math.sqrt(sum / Math.max(1, data.length));
+
+
+    /* Duration */
+
+    const duration =
+        data.length / sampleRate;
+
+
+    /* Average centroid */
+
+    const centroid =
+        frames > 0
+            ? centroidSum / frames
+            : 0;
+
+
+    return [
+        rms,
+        centroid,
+        duration,
+        ...spectralFeatures
+    ];
+}
+
+
+/* Cosine Similarity */
+
+function cosineSimilarity(a, b) {
+
+    let dot = 0;
+    let normA = 0;
+    let normB = 0;
+
+    const length = Math.min(a.length, b.length);
+
+    for (let i = 0; i < length; i++) {
+
+        dot += a[i] * b[i];
+
+        normA += a[i] * a[i];
+
+        normB += b[i] * b[i];
+    }
+
+    if (normA === 0 || normB === 0) {
+        return 0;
+    }
+
+    return dot /
+        (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
+
+/* Compare Reference Voice and User Voice */
+
+function compareVoice(referenceAudio, userAudio) {
+
+    const referenceFeatures =
+        getAudioFeatures(referenceAudio);
+
+    const userFeatures =
+        getAudioFeatures(userAudio);
+
+
+    /* Normalize each feature */
+
+    const length =
+        Math.min(
+            referenceFeatures.length,
+            userFeatures.length
+        );
+
+    let ref = [];
+    let user = [];
+
+    for (let i = 0; i < length; i++) {
+
+        const maxValue =
+            Math.max(
+                Math.abs(referenceFeatures[i]),
+                Math.abs(userFeatures[i]),
+                0.000001
+            );
+
+        ref.push(
+            referenceFeatures[i] / maxValue
+        );
+
+        user.push(
+            userFeatures[i] / maxValue
+        );
+    }
+
+
+    const similarity =
+        cosineSimilarity(ref, user);
+
+
+    let score =
+        similarity * 100;
+
+
+    /* Keep score between 0 and 100 */
+
+    score =
+        Math.max(
+            0,
+            Math.min(100, score)
+        );
+
+
+    return score;
+}
+
+
+/* =========================================================
+   STAR RESULT
+   ========================================================= */
+
+function getStars(score) {
+
+    if (score >= 85) {
+        return 3;
+    }
+
+    return 0;
+}
+
+
+function showResult(score) {
+
+    const stars = getStars(score);
+
+    showStarPopup(stars);
+
+    console.log(
+        "Voice Similarity Score:",
+        score.toFixed(2)
+    );
+}
+
+
+/* Star Popup */
+
+function showStarPopup(totalStars) {
+
+    const overlay =
+        document.getElementById("starPopupOverlay");
+
+    const popupStars =
+        document.getElementById("popupStars");
+
+    const popupFace =
+        document.getElementById("popupFace");
+
+    const popupMessage =
+        document.getElementById("popupMessage");
+
+
+    if (totalStars === 3) {
+
+        popupFace.innerHTML = "😃";
+
+        popupStars.innerHTML = "⭐⭐⭐";
+
+        popupMessage.innerHTML =
+            "Great Job!";
+
+    } else {
+
+        popupFace.innerHTML = "🤗";
+
+        popupStars.innerHTML = "⭐";
+
+        popupMessage.innerHTML =
+            "Try Again!";
+
+    }
+
+
+    overlay.style.display = "flex";
+
+
+    /* Falling stars */
+
+    for (let i = 0; i < 3; i++) {
+
+        const star =
+            document.createElement("div");
+
+        star.className =
+            "fallingStar";
+
+        star.innerHTML =
+            totalStars === 3
+                ? "⭐"
+                : "✨";
+
+        star.style.left =
+            Math.random() * 100 + "%";
+
+        star.style.animationDelay =
+            Math.random() * 1.5 + "s";
+
+        overlay.appendChild(star);
 
         setTimeout(function() {
 
-            // First stop recording
-            if (mediaRecorder && mediaRecorder.state === "recording") {
+            star.remove();
+
+        }, 3500);
+    }
+
+
+    /* Sparkle rain */
+
+    for (let i = 0; i < 14; i++) {
+
+        const sparkle =
+            document.createElement("div");
+
+        sparkle.className =
+            "sparkle";
+
+        sparkle.innerHTML =
+            "✨";
+
+        sparkle.style.left =
+            Math.random() * 100 + "%";
+
+        sparkle.style.animationDelay =
+            Math.random() * 2 + "s";
+
+        overlay.appendChild(sparkle);
+
+        setTimeout(function() {
+
+            sparkle.remove();
+
+        }, 3000);
+    }
+}
+
+
+function closeStarPopup() {
+
+    document.getElementById(
+        "starPopupOverlay"
+    ).style.display = "none";
+}
+
+
+/* =========================================================
+   RECORDING + VOICE COMPARISON
+   ========================================================= */
+
+let recognition;
+let mediaRecorder;
+let audioChunks = [];
+
+
+async function startRecording() {
+
+    try {
+
+        const stream =
+            await navigator.mediaDevices.getUserMedia({
+                audio: true
+            });
+
+
+        audioChunks = [];
+
+
+        mediaRecorder =
+            new MediaRecorder(stream);
+
+
+        mediaRecorder.ondataavailable =
+            function(event) {
+
+                if (event.data.size > 0) {
+
+                    audioChunks.push(
+                        event.data
+                    );
+                }
+            };
+
+
+        mediaRecorder.onstop =
+            async function() {
+
+                /* User recording */
+
+                const audioBlob =
+                    new Blob(
+                        audioChunks,
+                        {
+                            type: "audio/webm"
+                        }
+                    );
+
+
+                const audioURL =
+                    URL.createObjectURL(
+                        audioBlob
+                    );
+
+
+                const audio =
+                    document.createElement("audio");
+
+                audio.controls = true;
+
+                audio.src = audioURL;
+
+
+                document.getElementById(
+                    "myRecording"
+                ).innerHTML = "";
+
+
+                document.getElementById(
+                    "myRecording"
+                ).appendChild(audio);
+
+
+                /* ==========================
+                   GET REFERENCE K VOICE
+                   ========================== */
+
+                try {
+
+                    const referenceURL =
+                        document.querySelector(
+                            "#kSound source"
+                        ).src;
+
+
+                    const referenceResponse =
+                        await fetch(referenceURL);
+
+
+                    const referenceBlob =
+                        await referenceResponse.blob();
+
+
+                    /* ==========================
+                       DECODE BOTH AUDIO FILES
+                       ========================== */
+
+                    const audioContext =
+                        new (
+                            window.AudioContext ||
+                            window.webkitAudioContext
+                        )();
+
+
+                    const referenceArrayBuffer =
+                        await referenceBlob.arrayBuffer();
+
+
+                    const userArrayBuffer =
+                        await audioBlob.arrayBuffer();
+
+
+                    const referenceAudio =
+                        await audioContext.decodeAudioData(
+                            referenceArrayBuffer
+                        );
+
+
+                    const userAudio =
+                        await audioContext.decodeAudioData(
+                            userArrayBuffer
+                        );
+
+
+                    /* ==========================
+                       COMPARE VOICES
+                       ========================== */
+
+                    const score =
+                        compareVoice(
+                            referenceAudio,
+                            userAudio
+                        );
+
+
+                    console.log(
+                        "K Voice Score:",
+                        score.toFixed(2)
+                    );
+
+
+                    /* ==========================
+                       SHOW STARS
+                       ========================== */
+
+                    showResult(score);
+
+
+                } catch (comparisonError) {
+
+                    console.log(
+                        "Voice comparison error:",
+                        comparisonError
+                    );
+
+                    alert(
+                        "Voice comparison could not be completed."
+                    );
+                }
+            };
+
+
+        mediaRecorder.start();
+
+        console.log(
+            "Recording started"
+        );
+
+
+        setTimeout(function() {
+
+            if (
+                mediaRecorder &&
+                mediaRecorder.state === "recording"
+            ) {
+
                 mediaRecorder.stop();
             }
 
-            // IMPORTANT: stop microphone
-            stream.getTracks().forEach(function(track) {
-                track.stop();
-            });
 
-            console.log("Microphone stopped");
+            stream.getTracks().forEach(
+                function(track) {
+
+                    track.stop();
+
+                }
+            );
+
+
+            console.log(
+                "Microphone stopped"
+            );
 
         }, 5000);
 
+
     } catch (error) {
-        console.log("Microphone error:", error);
+
+        console.log(
+            "Microphone error:",
+            error
+        );
+
+        alert(
+            "Microphone permission is required."
+        );
     }
 }
+
+
 function goToPrevious() {
-    window.location.href = "/letter_j";
+
+    window.location.href =
+        "/letter_j";
 }
 
 
 function goToNext() {
-    window.location.href = "/letter_l";
+
+    window.location.href =
+        "/letter_l";
 }
 
 </script>
 
-    <p>Sound : / Kah /</p>
 
-    <h3>Pictures</h3>
+<p>Sound : / Kah /</p>
 
-    <div class="card">
+<h3>Pictures</h3>
+
+<div class="card">
+
     <img src="{{ url_for('static', filename='images/kite.jpg') }}" >
-    <p>Kite</p>
-    </div>
 
-    <div class="card">
-    <img src="{{ url_for('static', filename='images/key.jpg') }}" >   
+    <p>Kite</p>
+
+</div>
+
+
+<div class="card">
+
+    <img src="{{ url_for('static', filename='images/key.jpg') }}" >
+
     <p>Key</p>
-    </div>    
-    <br><br>
+
+</div>
+
+
+<br><br>
+
+
 <button onclick="goToPrevious()">
     ← Previous
 </button>
@@ -201,9 +1004,35 @@ function goToNext() {
     Next ➜
 </button>
 
-    
+
+<!-- STAR POPUP -->
+
+<div id="starPopupOverlay">
+
+    <div id="popupBox">
+
+        <div id="popupFace">
+            😃
+        </div>
+
+        <div id="popupStars">
+            ⭐⭐⭐
+        </div>
+
+        <div id="popupMessage">
+            Great Job!
+        </div>
+
+        <button
+            id="closePopup"
+            onclick="closeStarPopup()">
+            Continue
+        </button>
+
+    </div>
+
+</div>
 
 
 </body>
 </html>
-
