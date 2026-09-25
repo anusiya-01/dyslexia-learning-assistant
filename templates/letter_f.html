@@ -243,7 +243,7 @@ function trimSilence(data, sampleRate) {
     for (let i = 0; i < data.length; i++) {
         peak = Math.max(peak, Math.abs(data[i]));
     }
-    const threshold = Math.max(peak * 0.15, 0.005);
+    const threshold = Math.max(peak * 0.08, 0.003);
 
     let start = 0;
     let end = data.length;
@@ -346,7 +346,7 @@ function spectrumOfFrame(frame, sampleRate, numBands, minFreq, maxFreq) {
     return bands;
 }
 
-function getAudioFeatures(data, sampleRate, numBands = 16, minFreq = 150, maxFreq = 3500) {
+function getAudioFeatures(data, sampleRate, numBands = 16, minFreq = 150, maxFreq = 7000) {
     const frameSize = nextPow2(Math.min(Math.max(data.length, 256), 2048));
     const hop = Math.floor(frameSize / 2);
 
@@ -415,7 +415,7 @@ function compareVoice(referenceAudio, userAudio) {
     const refData = trimSilence(refRaw, referenceAudio.sampleRate);
     const userData = trimSilence(userRaw, userAudio.sampleRate);
 
-    if (rmsOf(userData) < 0.004 || userData.length < userAudio.sampleRate * 0.05) {
+    if (rmsOf(userData) < 0.0025 || userData.length < userAudio.sampleRate * 0.03) {
         return 0;
     }
 
