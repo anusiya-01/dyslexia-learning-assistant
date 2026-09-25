@@ -436,12 +436,29 @@ function compareVoice(referenceAudio, userAudio) {
 
     const baseScore = shapeScore * 0.75 + durationScore * 0.25;
 
-    const CENTROID_CUTOFF = 0.85;
+    // Gate 1: spectral centroid must line up reasonably well
+    const CENTROID_CUTOFF = 0.90;
     const centroidPenalty = centroidRatio >= CENTROID_CUTOFF
         ? 1
-        : Math.pow(centroidRatio / CENTROID_CUTOFF, 4);
+        : Math.pow(centroidRatio / CENTROID_CUTOFF, 5);
 
-    const finalScore = baseScore * centroidPenalty * 100;
+    // Gate 2: which frequency band holds the MOST energy (a rough stand-in
+    // for which vowel/formant region was hit). Different vowels usually
+    // peak in clearly different bands even when overall shape/centroid look
+    // deceptively similar - this catches those cases directly.
+    function argmax(arr) {
+        let best = 0;
+        for (let i = 1; i < arr.length; i++) if (arr[i] > arr[best]) best = i;
+        return best;
+    }
+    const refDominant = argmax(refFeat.shapeBands);
+    const userDominant = argmax(userFeat.shapeBands);
+    const bandDistance = Math.abs(refDominant - userDominant);
+    const bandPenalty = bandDistance === 0 ? 1
+                       : bandDistance === 1 ? 0.8
+                       : Math.pow(0.45, bandDistance);
+
+    const finalScore = baseScore * centroidPenalty * bandPenalty * 100;
 
     return Math.round(Math.max(0, Math.min(100, finalScore)));
 }
