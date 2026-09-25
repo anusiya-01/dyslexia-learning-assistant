@@ -67,173 +67,118 @@
             animation: bounce 0.6s;
         }
 
+        /* =========================================
+           CHILD FRIENDLY VOICE RESULT
+           ========================================= */
 
-        /* ==========================================
-           CHILD FRIENDLY RESULT POPUP
-           ========================================== */
-
-        #starPopupOverlay {
+        #voiceResultOverlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(91, 61, 121, 0.55);
+            background: rgba(90, 70, 120, 0.55);
             z-index: 9999;
             justify-content: center;
             align-items: center;
             overflow: hidden;
         }
 
-        #popupCloud {
+        #voiceResultCard {
             width: 320px;
-            min-height: 300px;
-            padding: 30px 25px;
+            padding: 30px 20px;
             text-align: center;
 
             background: linear-gradient(
-                145deg,
-                #fff3a6,
-                #ffd6f6,
-                #c9f5ff
+                135deg,
+                #FFF6A5,
+                #FFD6F5,
+                #BFEFFF
             );
 
-            border-radius: 45% 55% 50% 50% / 40% 45% 55% 60%;
-
             border: 5px solid white;
+            border-radius: 35px;
 
             box-shadow:
-                0 0 0 5px rgba(255,255,255,0.35),
-                0 15px 40px rgba(0,0,0,0.3);
+                0 12px 35px rgba(0,0,0,0.3);
 
             position: relative;
             z-index: 10001;
 
-            animation: popupBounce 0.55s ease-out;
+            animation: popupIn 0.5s ease;
         }
 
-        @keyframes popupBounce {
+        @keyframes popupIn {
             0% {
-                transform: scale(0.3) rotate(-8deg);
+                transform: scale(0.5) rotate(-5deg);
                 opacity: 0;
             }
 
             70% {
-                transform: scale(1.08) rotate(3deg);
+                transform: scale(1.08) rotate(2deg);
                 opacity: 1;
             }
 
             100% {
                 transform: scale(1) rotate(0);
+                opacity: 1;
             }
         }
 
-        #popupFace {
-            font-size: 75px;
-            margin-top: 5px;
+        #resultFace {
+            font-size: 70px;
         }
 
-        #popupStars {
+        #resultStars {
             font-size: 45px;
             min-height: 55px;
-            margin: 10px 0;
-            letter-spacing: 5px;
+            margin: 10px;
+            letter-spacing: 4px;
         }
 
-        #popupMessage {
-            font-size: 26px;
+        #resultMessage {
+            font-size: 25px;
             font-weight: bold;
-            color: #6a2c91;
+            color: #7B2CBF;
             margin: 10px;
         }
 
-        #popupScore {
+        #resultScore {
             font-size: 17px;
             font-weight: bold;
             color: #444;
-            margin-bottom: 15px;
+            margin: 10px;
         }
 
-        #closePopup {
-            background: linear-gradient(
-                135deg,
-                #ff7eb3,
-                #ff758c
-            );
-
+        #resultClose {
+            background: #FF7EB3;
             color: white;
             border: 3px solid white;
-
-            padding: 11px 28px;
-
             border-radius: 25px;
-
+            padding: 11px 28px;
             font-size: 18px;
             font-weight: bold;
-
             cursor: pointer;
-
-            box-shadow: 0 5px 12px rgba(0,0,0,0.2);
-
-            margin: 5px;
         }
-
-        #closePopup:hover {
-            transform: scale(1.05);
-        }
-
-
-        /* Falling stars */
 
         .fallingStar {
-            position: absolute;
-            top: -60px;
-            font-size: 38px;
-            animation: fallStar 3s linear forwards;
+            position: fixed;
+            top: -50px;
+            font-size: 32px;
             z-index: 10000;
+            pointer-events: none;
+            animation: starFall 3s linear forwards;
         }
 
-        @keyframes fallStar {
+        @keyframes starFall {
             0% {
-                transform:
-                    translateY(-60px)
-                    rotate(0deg)
-                    scale(0.7);
-
+                transform: translateY(-50px) rotate(0deg);
                 opacity: 1;
             }
 
             100% {
-                transform:
-                    translateY(100vh)
-                    rotate(360deg)
-                    scale(1.2);
-
+                transform: translateY(100vh) rotate(360deg);
                 opacity: 0;
             }
         }
-
-
-        /* Sparkles */
-
-        .sparkle {
-            position: absolute;
-            top: -30px;
-            font-size: 25px;
-            animation: sparkleFall 2.5s linear forwards;
-            z-index: 10000;
-        }
-
-        @keyframes sparkleFall {
-            0% {
-                transform: translateY(-30px) rotate(0deg);
-                opacity: 1;
-            }
-
-            100% {
-                transform: translateY(100vh) rotate(180deg);
-                opacity: 0;
-            }
-        }
-
     </style>
 
 </head>
@@ -261,12 +206,16 @@
     <div id="myRecording"></div>
 
 
+    <!-- ORIGINAL K REPEAT SOUND -->
+
     <audio id="repeatSound">
         <source
             src="{{ url_for('static', filename='sounds/k_repeat.mp3') }}"
             type="audio/mpeg">
     </audio>
 
+
+    <!-- ORIGINAL K SOUND -->
 
     <audio id="kSound">
         <source
@@ -277,10 +226,9 @@
 
 <script>
 
-
-/* ==========================================
-   K INTRO
-   ========================================== */
+/* =========================================
+   ORIGINAL K INTRO
+   ========================================= */
 
 function playIntro() {
 
@@ -292,9 +240,9 @@ function playIntro() {
 }
 
 
-/* ==========================================
-   K SOUND
-   ========================================== */
+/* =========================================
+   ORIGINAL K SOUND
+   ========================================= */
 
 function playSound() {
 
@@ -316,12 +264,13 @@ function playSound() {
 }
 
 
-/* =========================================================
+/* =================================================
    VOICE COMPARISON ALGORITHM
-   ========================================================= */
+   Audio Features + Cosine Similarity
+   ================================================= */
 
 
-/* Remove silence from beginning and end */
+/* Remove silence */
 
 function trimSilence(buffer) {
 
@@ -385,7 +334,6 @@ function trimSilence(buffer) {
         i < length;
         i++
     ) {
-
         newData[i] =
             data[start + i];
     }
@@ -395,36 +343,11 @@ function trimSilence(buffer) {
 }
 
 
-/* ==========================================
-   RMS / ENERGY
-   ========================================== */
-
-function calculateRMS(data) {
-
-    let sum = 0;
-
-    for (
-        let i = 0;
-        i < data.length;
-        i++
-    ) {
-
-        sum +=
-            data[i] * data[i];
-    }
-
-
-    return Math.sqrt(
-        sum / Math.max(1, data.length)
-    );
-}
-
-
-/* ==========================================
+/* =========================================
    FFT
-   ========================================== */
+   ========================================= */
 
-function nextPowerOfTwo(value) {
+function nextPow2(value) {
 
     let n = 1;
 
@@ -535,19 +458,17 @@ function fft(real, imag) {
 
 
                 const vReal =
-                    real[i + k + len / 2]
-                    * wCos
-                    -
-                    imag[i + k + len / 2]
-                    * wSin;
+                    real[i + k + len / 2] *
+                    wCos -
+                    imag[i + k + len / 2] *
+                    wSin;
 
 
                 const vImag =
-                    real[i + k + len / 2]
-                    * wSin
-                    +
-                    imag[i + k + len / 2]
-                    * wCos;
+                    real[i + k + len / 2] *
+                    wSin +
+                    imag[i + k + len / 2] *
+                    wCos;
 
 
                 real[i + k] =
@@ -565,14 +486,12 @@ function fft(real, imag) {
 
 
                 const tempCos =
-                    wCos * wlenCos
-                    -
+                    wCos * wlenCos -
                     wSin * wlenSin;
 
 
                 wSin =
-                    wCos * wlenSin
-                    +
+                    wCos * wlenSin +
                     wSin * wlenCos;
 
 
@@ -584,9 +503,9 @@ function fft(real, imag) {
 }
 
 
-/* ==========================================
-   FIXED AUDIO FEATURES
-   ========================================== */
+/* =========================================
+   AUDIO FEATURE EXTRACTION
+   ========================================= */
 
 function getAudioFeatures(buffer) {
 
@@ -602,27 +521,44 @@ function getAudioFeatures(buffer) {
         trimmed.sampleRate;
 
 
-    const duration =
-        data.length / sampleRate;
-
-
-    const rms =
-        calculateRMS(data);
-
-
     const frameSize = 2048;
 
     const hopSize = 1024;
 
 
-    /*
-       Fixed five frequency bands.
-       This is important because reference
-       and user recordings can have different
-       durations.
-    */
+    /* RMS */
 
-    let bandTotals =
+    let rmsSum = 0;
+
+
+    for (
+        let i = 0;
+        i < data.length;
+        i++
+    ) {
+
+        rmsSum +=
+            data[i] * data[i];
+    }
+
+
+    const rms =
+        Math.sqrt(
+            rmsSum /
+            Math.max(1, data.length)
+        );
+
+
+    /* Duration */
+
+    const duration =
+        data.length /
+        sampleRate;
+
+
+    /* Frequency bands */
+
+    let bands =
         [0, 0, 0, 0, 0];
 
 
@@ -645,7 +581,7 @@ function getAudioFeatures(buffer) {
 
 
         const size =
-            nextPowerOfTwo(
+            nextPow2(
                 frame.length
             );
 
@@ -658,15 +594,13 @@ function getAudioFeatures(buffer) {
             new Float32Array(size);
 
 
+        /* Hann window */
+
         for (
             let i = 0;
             i < frame.length;
             i++
         ) {
-
-            /*
-               Hann window
-            */
 
             const window =
                 0.5 -
@@ -724,37 +658,33 @@ function getAudioFeatures(buffer) {
                 magnitude;
 
 
-            /*
-               Five fixed frequency bands
-            */
-
             if (frequency < 500) {
 
-                bandTotals[0] +=
+                bands[0] +=
                     magnitude;
 
             }
             else if (frequency < 1000) {
 
-                bandTotals[1] +=
+                bands[1] +=
                     magnitude;
 
             }
             else if (frequency < 2000) {
 
-                bandTotals[2] +=
+                bands[2] +=
                     magnitude;
 
             }
             else if (frequency < 4000) {
 
-                bandTotals[3] +=
+                bands[3] +=
                     magnitude;
 
             }
             else {
 
-                bandTotals[4] +=
+                bands[4] +=
                     magnitude;
             }
         }
@@ -776,11 +706,11 @@ function getAudioFeatures(buffer) {
 
         for (
             let i = 0;
-            i < bandTotals.length;
+            i < bands.length;
             i++
         ) {
 
-            bandTotals[i] /=
+            bands[i] /=
                 frameCount;
         }
 
@@ -790,57 +720,44 @@ function getAudioFeatures(buffer) {
     }
 
 
-    /*
-       Normalize spectral bands
-       so recording volume does not
-       dominate the comparison.
-    */
+    /* Normalize frequency bands */
 
-    const bandSum =
-        bandTotals.reduce(
-            (a, b) => a + b,
+    const bandTotal =
+        bands.reduce(
+            function(sum, value) {
+                return sum + value;
+            },
             0
         );
 
 
-    let normalizedBands =
-        bandTotals.map(
-            value =>
-                bandSum > 0
-                ? value / bandSum
-                : 0
-        );
+    if (bandTotal > 0) {
+
+        bands =
+            bands.map(
+                function(value) {
+                    return value / bandTotal;
+                }
+            );
+    }
 
 
     /*
-       Final fixed feature vector
+       Fixed feature vector
     */
 
     return [
-
         rms,
-
         centroidTotal / 4000,
-
-        /*
-           Duration is gently normalized.
-           This prevents duration difference
-           from making a correct voice wrong.
-        */
-
-        Math.min(
-            duration / 2,
-            1
-        ),
-
-        ...normalizedBands
+        duration,
+        ...bands
     ];
 }
 
 
-/* ==========================================
+/* =========================================
    COSINE SIMILARITY
-   ========================================== */
+   ========================================= */
 
 function cosineSimilarity(a, b) {
 
@@ -894,9 +811,9 @@ function cosineSimilarity(a, b) {
 }
 
 
-/* ==========================================
-   VOICE COMPARISON
-   ========================================== */
+/* =========================================
+   COMPARE REFERENCE + USER VOICE
+   ========================================= */
 
 function compareVoice(
     referenceAudio,
@@ -916,24 +833,10 @@ function compareVoice(
 
 
     /*
-       Normalize the RMS feature
-       independently so volume difference
-       does not cause a false failure.
+       Ignore volume difference.
+       A child may speak louder or softer
+       than the reference recording.
     */
-
-    const referenceRMS =
-        Math.max(
-            referenceFeatures[0],
-            0.000001
-        );
-
-
-    const userRMS =
-        Math.max(
-            userFeatures[0],
-            0.000001
-        );
-
 
     referenceFeatures[0] = 1;
 
@@ -941,27 +844,35 @@ function compareVoice(
 
 
     /*
-       Cosine similarity
+       Normalize duration.
+       Small duration differences should
+       not cause an automatic failure.
     */
 
-    let similarity =
+    referenceFeatures[2] =
+        Math.min(
+            referenceFeatures[2] / 2,
+            1
+        );
+
+
+    userFeatures[2] =
+        Math.min(
+            userFeatures[2] / 2,
+            1
+        );
+
+
+    const similarity =
         cosineSimilarity(
             referenceFeatures,
             userFeatures
         );
 
 
-    /*
-       Convert to percentage
-    */
-
     let score =
         similarity * 100;
 
-
-    /*
-       Keep score in valid range
-    */
 
     score =
         Math.max(
@@ -986,14 +897,9 @@ function compareVoice(
 
 
     console.log(
-        "Cosine Similarity:",
-        similarity
-    );
-
-
-    console.log(
-        "Final Voice Score:",
-        score
+        "Voice Similarity:",
+        score.toFixed(2) +
+        "%"
     );
 
 
@@ -1001,128 +907,304 @@ function compareVoice(
 }
 
 
-/* ==========================================
-   STAR CALCULATION
-   ========================================== */
+/* =========================================
+   STAR RULE
+   ========================================= */
 
 function getStars(score) {
 
     /*
-       70% or above = correct
-       Correct = 3 stars
-       Wrong = 0 stars
+       70% or above
+       = correct
+       = 3 stars
+
+       Below 70%
+       = wrong
+       = 0 stars
     */
 
     if (score >= 70) {
-
         return 3;
     }
-
 
     return 0;
 }
 
 
-/* ==========================================
-   SHOW RESULT
-   ========================================== */
-
-function showResult(score) {
-
-    const stars =
-        getStars(score);
-
-
-    showStarPopup(
-        stars,
-        score
-    );
-}
-
-
-/* ==========================================
-   CHILD FRIENDLY POPUP
-   ========================================== */
+/* =========================================
+   CHILD FRIENDLY RESULT POPUP
+   ========================================= */
 
 function showStarPopup(
-    totalStars,
+    stars,
     score
 ) {
 
-    const overlay =
+    const oldPopup =
         document.getElementById(
-            "starPopupOverlay"
+            "voiceResultPopup"
         );
 
 
-    const popupStars =
-        document.getElementById(
-            "popupStars"
-        );
-
-
-    const popupFace =
-        document.getElementById(
-            "popupFace"
-        );
-
-
-    const popupMessage =
-        document.getElementById(
-            "popupMessage"
-        );
-
-
-    const popupScore =
-        document.getElementById(
-            "popupScore"
-        );
-
-
-    if (totalStars === 3) {
-
-        popupFace.innerHTML =
-            "😄";
-
-        popupStars.innerHTML =
-            "⭐⭐⭐";
-
-        popupMessage.innerHTML =
-            "Amazing! Great Job!";
-
-    }
-    else {
-
-        popupFace.innerHTML =
-            "🤗";
-
-        /*
-           IMPORTANT:
-           Wrong answer = NO STAR
-        */
-
-        popupStars.innerHTML =
-            "";
-
-        popupMessage.innerHTML =
-            "Try Again!";
-
+    if (oldPopup) {
+        oldPopup.remove();
     }
 
 
-    popupScore.innerHTML =
+    const popup =
+        document.createElement(
+            "div"
+        );
+
+
+    popup.id =
+        "voiceResultPopup";
+
+
+    popup.style.position =
+        "fixed";
+
+
+    popup.style.left =
+        "50%";
+
+
+    popup.style.top =
+        "50%";
+
+
+    popup.style.transform =
+        "translate(-50%, -50%) scale(0.7)";
+
+
+    popup.style.width =
+        "300px";
+
+
+    popup.style.padding =
+        "30px 20px";
+
+
+    popup.style.textAlign =
+        "center";
+
+
+    popup.style.background =
+        stars === 3
+        ? "linear-gradient(135deg,#FFF6A5,#FFD6F5,#BFEFFF)"
+        : "linear-gradient(135deg,#D8F3FF,#E8D9FF,#FFF0B8)";
+
+
+    popup.style.border =
+        "5px solid white";
+
+
+    popup.style.borderRadius =
+        "35px";
+
+
+    popup.style.boxShadow =
+        "0 12px 35px rgba(0,0,0,0.3)";
+
+
+    popup.style.zIndex =
+        "10000";
+
+
+    popup.style.fontFamily =
+        "Arial, sans-serif";
+
+
+    popup.style.transition =
+        "transform 0.4s ease";
+
+
+    /* Face */
+
+    const face =
+        document.createElement(
+            "div"
+        );
+
+
+    face.style.fontSize =
+        "65px";
+
+
+    face.innerHTML =
+        stars === 3
+        ? "😄"
+        : "🤗";
+
+
+    /* Stars */
+
+    const starText =
+        document.createElement(
+            "div"
+        );
+
+
+    starText.style.fontSize =
+        "42px";
+
+
+    starText.style.margin =
+        "10px 0";
+
+
+    /*
+       Wrong answer gets NO star.
+    */
+
+    starText.innerHTML =
+        stars === 3
+        ? "⭐⭐⭐"
+        : "";
+
+
+    /* Message */
+
+    const message =
+        document.createElement(
+            "div"
+        );
+
+
+    message.style.fontSize =
+        "24px";
+
+
+    message.style.fontWeight =
+        "bold";
+
+
+    message.style.color =
+        stars === 3
+        ? "#7B2CBF"
+        : "#5C5470";
+
+
+    message.innerHTML =
+        stars === 3
+        ? "Amazing! 🎉"
+        : "Try Again! 💪";
+
+
+    /* Score */
+
+    const scoreText =
+        document.createElement(
+            "div"
+        );
+
+
+    scoreText.style.margin =
+        "10px";
+
+
+    scoreText.style.fontSize =
+        "16px";
+
+
+    scoreText.style.fontWeight =
+        "bold";
+
+
+    scoreText.style.color =
+        "#444";
+
+
+    scoreText.innerHTML =
         "Voice Match: " +
         score.toFixed(0) +
         "%";
 
 
-    overlay.style.display =
-        "flex";
+    /* Continue button */
+
+    const closeButton =
+        document.createElement(
+            "button"
+        );
 
 
-    /*
-       Falling stars
-    */
+    closeButton.innerHTML =
+        "🌈 Continue";
+
+
+    closeButton.style.background =
+        "#FF7EB3";
+
+
+    closeButton.style.color =
+        "white";
+
+
+    closeButton.style.border =
+        "none";
+
+
+    closeButton.style.borderRadius =
+        "25px";
+
+
+    closeButton.style.padding =
+        "12px 28px";
+
+
+    closeButton.style.fontSize =
+        "18px";
+
+
+    closeButton.style.fontWeight =
+        "bold";
+
+
+    closeButton.style.cursor =
+        "pointer";
+
+
+    closeButton.style.marginTop =
+        "10px";
+
+
+    closeButton.onclick =
+        function() {
+
+            popup.remove();
+
+        };
+
+
+    popup.appendChild(face);
+
+    popup.appendChild(starText);
+
+    popup.appendChild(message);
+
+    popup.appendChild(scoreText);
+
+    popup.appendChild(closeButton);
+
+
+    document.body.appendChild(
+        popup
+    );
+
+
+    setTimeout(
+        function() {
+
+            popup.style.transform =
+                "translate(-50%, -50%) scale(1)";
+
+        },
+        50
+    );
+
+
+    /* Falling stars */
 
     for (
         let i = 0;
@@ -1141,7 +1223,7 @@ function showStarPopup(
 
 
         star.innerHTML =
-            totalStars === 3
+            stars === 3
             ? "⭐"
             : "✨";
 
@@ -1156,7 +1238,7 @@ function showStarPopup(
             "s";
 
 
-        overlay.appendChild(
+        document.body.appendChild(
             star
         );
 
@@ -1170,46 +1252,8 @@ function showStarPopup(
             3500
         );
     }
+}
 
 
-    /*
-       Sparkles
-    */
-
-    for (
-        let i = 0;
-        i < 18;
-        i++
-    ) {
-
-        const sparkle =
-            document.createElement(
-                "div"
-            );
-
-
-        sparkle.className =
-            "sparkle";
-
-
-        sparkle.innerHTML =
-            "✨";
-
-
-        sparkle.style.left =
-            Math.random() * 100 +
-            "%";
-
-
-        sparkle.style.animationDelay =
-            Math.random() * 2 +
-            "s";
-
-
-        overlay.appendChild(
-            sparkle
-        );
-
-
-        setTimeout(
-            function() {
+/* =========================================
+   RECORDIN
