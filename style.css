@@ -5,23 +5,23 @@
 }
 
 body {
-    font-family: "Trebuchet MS", Arial, sans-serif;
+    font-family: "Fredoka", "Trebuchet MS", Arial, sans-serif;
     min-height: 100vh;
-
-    /* Unicorn magical background */
-    background:
-        radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.55), transparent 18%),
-        radial-gradient(circle at 85% 15%, rgba(255, 210, 250, 0.45), transparent 20%),
-        linear-gradient(135deg, #eadcff, #c9c5ff, #bdefff, #ffd5ed);
-
-    color: #4b3575;
+    /* Soft Pastel Dreamy Unicorn Gradient */
+    background: linear-gradient(135deg, #fce4ec, #f3e5f5, #e1bee7, #e0f7fa);
+    background-size: 400% 400%;
+    animation: unicornBg 12s ease infinite;
+    color: #4a2c6d;
     overflow-x: hidden;
 }
 
+@keyframes unicornBg {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
 
-/* =========================
-   Magical Background
-   ========================= */
+/* Background Elements */
 
 .background {
     position: fixed;
@@ -33,71 +33,44 @@ body {
 
 .star {
     position: absolute;
-    font-size: 28px;
-    animation: floatStar 4s infinite ease-in-out;
-    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.9));
+    font-size: 30px;
+    animation: floatStar 3s infinite ease-in-out alternate;
+    filter: drop-shadow(0 0 8px #fff275);
 }
 
-.star:nth-child(1) {
-    top: 12%;
-    left: 8%;
-}
-
-.star:nth-child(2) {
-    top: 25%;
-    right: 10%;
-}
-
-.star:nth-child(3) {
-    bottom: 25%;
-    left: 5%;
-}
-
-.star:nth-child(4) {
-    bottom: 12%;
-    right: 7%;
-}
+.star:nth-child(1) { top: 12%; left: 8%; animation-delay: 0s; }
+.star:nth-child(2) { top: 25%; right: 10%; animation-delay: 0.8s; }
+.star:nth-child(3) { bottom: 25%; left: 5%; animation-delay: 1.5s; }
+.star:nth-child(4) { bottom: 12%; right: 7%; animation-delay: 2.2s; }
 
 .cloud {
     position: absolute;
-    font-size: 70px;
-    opacity: 0.45;
-    top: 20%;
-    left: -20px;
-    animation: cloudMove 12s linear infinite;
+    font-size: 80px;
+    opacity: 0.6;
+    top: 15%;
+    left: -100px;
+    animation: cloudMove 16s linear infinite;
+    filter: drop-shadow(0 5px 15px rgba(255, 255, 255, 0.8));
 }
 
 .cloud2 {
-    top: 70%;
+    top: 65%;
     left: auto;
-    right: -30px;
-    animation-delay: 3s;
+    right: -100px;
+    animation-delay: 5s;
 }
 
 @keyframes floatStar {
-    0%, 100% {
-        transform: translateY(0) rotate(0deg);
-    }
-
-    50% {
-        transform: translateY(-20px) rotate(15deg);
-    }
+    0% { transform: translateY(0) scale(1) rotate(0deg); }
+    100% { transform: translateY(-18px) scale(1.2) rotate(20deg); }
 }
 
 @keyframes cloudMove {
-    from {
-        transform: translateX(0);
-    }
-
-    to {
-        transform: translateX(110vw);
-    }
+    from { transform: translateX(0); }
+    to { transform: translateX(115vw); }
 }
 
-
-/* =========================
-   Main
-   ========================= */
+/* Container */
 
 .container {
     position: relative;
@@ -108,66 +81,43 @@ body {
     padding: 35px 0;
 }
 
-
-/* =========================
-   Header
-   ========================= */
+/* Header */
 
 header {
     display: flex;
     align-items: center;
     gap: 15px;
     margin-bottom: 25px;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 15px 25px;
+    border-radius: 25px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 20px rgba(186, 104, 200, 0.15);
 }
 
 .logo {
-    position: relative;
-    font-size: 42px;
-
-    /* Hide existing brain visually */
-    color: transparent;
-
-    width: 65px;
-    height: 65px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: rgba(255, 255, 255, 0.65);
-    border-radius: 50%;
-
-    box-shadow:
-        0 8px 20px rgba(126, 82, 180, 0.25),
-        0 0 25px rgba(255, 255, 255, 0.8);
+    font-size: 50px;
+    animation: logoGlow 2s infinite alternate;
 }
 
-/* Unicorn logo appearance */
-.logo::after {
-    content: "🦄";
-    position: absolute;
-    font-size: 43px;
-    color: initial;
+@keyframes logoGlow {
+    from { filter: drop-shadow(0 0 2px #ff80ab); }
+    to { filter: drop-shadow(0 0 10px #b388ff); }
 }
 
 header h1 {
     font-size: 34px;
     letter-spacing: 1px;
-    color: #593b91;
-
-    text-shadow: 1px 2px 0 rgba(255, 255, 255, 0.7);
+    color: #6a1b9a;
 }
 
 header p {
-    color: #765f9d;
-    margin-top: 5px;
-    font-weight: bold;
+    color: #8e24aa;
+    margin-top: 3px;
+    font-weight: 600;
 }
 
-
-/* =========================
-   Hero
-   ========================= */
+/* Hero Section */
 
 .hero {
     display: flex;
@@ -175,25 +125,18 @@ header p {
     justify-content: center;
     gap: 55px;
 
-    background: rgba(255, 255, 255, 0.58);
-
-    border: 3px solid rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.65);
+    border: 2px solid rgba(255, 255, 255, 0.9);
     border-radius: 35px;
 
-    padding: 30px;
-    margin-bottom: 30px;
+    padding: 35px;
+    margin-bottom: 35px;
 
-    box-shadow:
-        0 15px 35px rgba(105, 72, 155, 0.18),
-        inset 0 0 25px rgba(255, 255, 255, 0.4);
-
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 15px 35px rgba(179, 136, 255, 0.2);
 }
 
-
-/* =========================
-   Cartoon
-   ========================= */
+/* Unicorn Character Visual Improvement */
 
 .character {
     position: relative;
@@ -203,100 +146,87 @@ header p {
 }
 
 @keyframes characterFloat {
-    0%, 100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-12px);
-    }
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
 }
+
+/* Magic Unicorn Horn Addition */
 
 .crown {
     position: absolute;
-    top: -20px;
-    left: 75px;
-    font-size: 55px;
-    transform: rotate(-8deg);
-    filter: drop-shadow(0 4px 4px rgba(120, 70, 150, 0.25));
+    top: -25px;
+    left: 85px;
+    font-size: 50px;
+    transform: rotate(5deg);
+    filter: drop-shadow(0 0 12px #ff4081);
 }
 
 .head {
     position: absolute;
     width: 165px;
     height: 150px;
-    background: #ffd1b8;
+    background: #ffffff;
     border-radius: 50%;
     left: 32px;
     top: 35px;
-    border: 5px solid #8157a8;
+    border: 4px solid #ea80fc;
+    box-shadow: inset -5px -5px 15px #f8bbd0;
 }
 
 .hair {
     position: absolute;
-    width: 120px;
-    height: 55px;
-    background: #70489b;
+    width: 130px;
+    height: 60px;
+    /* Rainbow Mane */
+    background: linear-gradient(90deg, #ff80ab, #ffd180, #80d8ff, #b388ff);
     border-radius: 60% 60% 30% 30%;
-    top: -8px;
-    left: 18px;
+    top: -12px;
+    left: 15px;
 }
 
 .eye {
     position: absolute;
-    width: 38px;
-    height: 45px;
-    background: #34204f;
+    width: 36px;
+    height: 42px;
+    background: #4a148c;
     border-radius: 50%;
     top: 58px;
 }
 
-.eye1 {
-    left: 35px;
-}
-
-.eye2 {
-    right: 35px;
-}
+.eye1 { left: 35px; }
+.eye2 { right: 35px; }
 
 .eye span {
     position: absolute;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     background: white;
     border-radius: 50%;
-    top: 8px;
-    left: 8px;
+    top: 6px;
+    left: 6px;
 }
 
 .mouth {
     position: absolute;
-    width: 28px;
-    height: 20px;
-    background: #e75b91;
-    border-radius: 50%;
-    left: 63px;
+    width: 26px;
+    height: 16px;
+    background: #ff4081;
+    border-radius: 0 0 50px 50px;
+    left: 65px;
     bottom: 25px;
 }
 
 .cheek {
     position: absolute;
-    width: 20px;
-    height: 10px;
-    background: #f49b9b;
+    width: 22px;
+    height: 12px;
+    background: #ff80ab;
     border-radius: 50%;
-    opacity: 0.7;
+    opacity: 0.6;
 }
 
-.cheek1 {
-    left: 15px;
-    bottom: 42px;
-}
-
-.cheek2 {
-    right: 15px;
-    bottom: 42px;
-}
+.cheek1 { left: 15px; bottom: 40px; }
+.cheek2 { right: 15px; bottom: 40px; }
 
 .body {
     position: absolute;
@@ -310,23 +240,15 @@ header p {
     font-size: 75px;
     right: -5px;
     bottom: 0;
-    animation: bookBounce 2s infinite;
+    animation: bookBounce 2s infinite ease-in-out;
 }
 
 @keyframes bookBounce {
-    0%, 100% {
-        transform: rotate(-5deg);
-    }
-
-    50% {
-        transform: rotate(5deg) translateY(-8px);
-    }
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(8deg) translateY(-10px); }
 }
 
-
-/* =========================
-   Welcome Text
-   ========================= */
+/* Welcome Text */
 
 .welcome-text {
     max-width: 550px;
@@ -334,30 +256,26 @@ header p {
 
 .hello {
     display: inline-block;
-
-    background: linear-gradient(135deg, #d879ff, #ff8ec8);
-
+    background: linear-gradient(90deg, #ff4081, #ab47bc);
     color: white;
-
-    padding: 10px 20px;
+    padding: 10px 22px;
     border-radius: 25px;
-
     font-weight: bold;
     margin-bottom: 15px;
-
-    box-shadow: 0 7px 18px rgba(170, 92, 190, 0.25);
+    box-shadow: 0 5px 15px rgba(255, 64, 129, 0.3);
 }
 
 .welcome-text h2 {
-    font-size: 42px;
+    font-size: 40px;
     margin-bottom: 12px;
-    color: #593b91;
+    color: #4a148c;
 }
 
 .welcome-text p {
-    color: #66577d;
+    color: #6a1b9a;
     line-height: 1.7;
     font-size: 18px;
+    font-weight: 500;
 }
 
 .learning-pills {
@@ -368,21 +286,16 @@ header p {
 }
 
 .learning-pills span {
-    background: rgba(255, 255, 255, 0.75);
-    color: #65468c;
-
-    padding: 10px 17px;
+    background: #ffffff;
+    color: #7b1fa2;
+    padding: 10px 18px;
     border-radius: 20px;
-
-    border: 2px solid rgba(255, 255, 255, 0.8);
-
-    box-shadow: 0 5px 12px rgba(120, 80, 160, 0.12);
+    font-weight: bold;
+    border: 2px solid #e1bee7;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
-
-/* =========================
-   Learning Cards
-   ========================= */
+/* Cards Section */
 
 .cards {
     display: grid;
@@ -391,100 +304,81 @@ header p {
 }
 
 .card {
-    padding: 28px;
+    padding: 30px 25px;
     border-radius: 30px;
     text-align: center;
-
-    border: 3px solid rgba(255, 255, 255, 0.75);
-
-    transition: 0.3s;
-
-    box-shadow:
-        0 12px 25px rgba(100, 70, 140, 0.18);
+    border: 3px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
 .card:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow:
-        0 18px 30px rgba(100, 70, 140, 0.25);
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 18px 35px rgba(186, 104, 200, 0.3);
 }
 
+/* Unicorn Pastel Gradient Cards */
 
-/* Reading */
 .reading-card {
-    background: linear-gradient(145deg, #d8b4ff, #ffb5da);
+    background: linear-gradient(145deg, #ff80ab, #ff80ab, #f48fb1);
+    color: white;
 }
 
-
-/* Phonics */
 .phonics-card {
-    background: linear-gradient(145deg, #b9e9ff, #c9c2ff);
+    background: linear-gradient(145deg, #b388ff, #7c4dff);
+    color: white;
 }
 
-
-/* Progress */
 .progress-card {
-    background: linear-gradient(145deg, #c4f5df, #bce7ff);
+    background: linear-gradient(145deg, #80d8ff, #40c4ff);
+    color: white;
 }
 
 .card-icon {
-    font-size: 60px;
+    font-size: 65px;
     margin-bottom: 12px;
-
-    filter: drop-shadow(0 4px 4px rgba(100, 60, 130, 0.18));
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
 }
 
 .card h3 {
-    font-size: 30px;
+    font-size: 28px;
     margin-bottom: 12px;
-    color: #553a7e;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
 .card p {
     line-height: 1.6;
     min-height: 55px;
-    color: #594d69;
+    color: #ffffff;
+    opacity: 0.95;
 }
 
 .card button {
     margin-top: 22px;
-
     border: none;
-
-    padding: 13px 25px;
-
+    padding: 14px 28px;
     border-radius: 30px;
-
     font-size: 16px;
     font-weight: bold;
-
     cursor: pointer;
 
-    background: white;
-    color: #65418c;
-
-    box-shadow:
-        0 7px 15px rgba(100, 60, 140, 0.18);
+    background: #ffffff;
+    color: #4a148c;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 
     transition: 0.25s;
 }
 
 .card button:hover {
-    transform: scale(1.08);
-
-    background: #fff4ff;
-
-    box-shadow:
-        0 10px 20px rgba(100, 60, 140, 0.25);
+    transform: scale(1.1);
+    background: #fff8e1;
+    color: #ff4081;
 }
 
-
-/* =========================
-   Motivation
-   ========================= */
+/* Motivation Bar */
 
 .motivation {
-    margin: 30px auto 20px;
+    margin: 35px auto 25px;
 
     display: flex;
     justify-content: center;
@@ -492,71 +386,40 @@ header p {
     gap: 20px;
 
     max-width: 750px;
-
     padding: 20px 30px;
 
     border-radius: 30px;
-
-    background: rgba(255, 255, 255, 0.62);
-
-    border: 2px solid rgba(255, 255, 255, 0.8);
-
-    box-shadow:
-        0 10px 25px rgba(100, 70, 140, 0.14);
+    background: rgba(255, 255, 255, 0.7);
+    border: 2px solid #f8bbd0;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
 }
 
 .motivation h3 {
     text-align: center;
     font-size: 20px;
-    color: #654a83;
+    color: #6a1b9a;
 }
 
-
-/* =========================
-   Footer
-   ========================= */
+/* Footer */
 
 footer {
     text-align: center;
-    color: #705c8c;
-    padding: 15px;
-    font-weight: bold;
+    color: #7b1fa2;
+    padding: 20px;
+    font-weight: 600;
 }
 
-
-/* =========================
-   Mobile
-   ========================= */
+/* Mobile Responsive */
 
 @media (max-width: 800px) {
-
-    .container {
-        width: 94%;
-        padding: 25px 0;
-    }
-
-    header {
-        justify-content: center;
-        text-align: left;
-    }
 
     header h1 {
         font-size: 25px;
     }
 
-    .logo {
-        width: 55px;
-        height: 55px;
-    }
-
-    .logo::after {
-        font-size: 36px;
-    }
-
     .hero {
         flex-direction: column;
         text-align: center;
-        gap: 25px;
     }
 
     .cards {
@@ -569,9 +432,5 @@ footer {
 
     .learning-pills {
         justify-content: center;
-    }
-
-    .character {
-        transform: scale(0.9);
     }
 }
