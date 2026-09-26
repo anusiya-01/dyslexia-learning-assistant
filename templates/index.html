@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic Unicorn - Phonics & Reading Assistant</title>
-    <!-- Google Fonts for Kids -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Unicorn Learning Assistant</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <!-- Magic Floating Background Elements -->
     <div class="background">
         <span class="star">⭐</span>
         <span class="star">✨</span>
-        <span class="star">🦄</span>
-        <span class="star">💖</span>
+        <span class="star">⭐</span>
+        <span class="star">✨</span>
         <span class="cloud">☁️</span>
         <span class="cloud cloud2">☁️</span>
     </div>
@@ -25,129 +22,146 @@
 
         <!-- Header -->
         <header>
-            <div class="logo" style="cursor: pointer;" onclick="goHome()">🦄</div>
+            <div class="logo">🦄</div>
 
             <div>
-                <h1 style="cursor: pointer;" onclick="goHome()">Unicorn Phonics & Reading</h1>
-                <p>Learn • Practice • Magic Growth ✨</p>
+                <h1>Unicorn Learning Assistant</h1>
+                <p>Learn • Practice • Improve</p>
             </div>
         </header>
 
-        <!-- MAIN DASHBOARD PAGE -->
-        <div id="homePage">
-            <!-- Welcome Hero Section -->
-            <section class="hero">
-                <div class="character">
-                    <div class="crown">🦄</div>
-                    <div class="head">
-                        <div class="hair"></div>
-                        <div class="eye eye1"><span></span></div>
-                        <div class="eye eye2"><span></span></div>
-                        <div class="mouth"></div>
-                        <div class="cheek cheek1"></div>
-                        <div class="cheek cheek2"></div>
+        <!-- Welcome Section -->
+        <section class="hero">
+
+            <!-- Cute Cartoon -->
+            <div class="character">
+
+                <div class="crown">🦄</div>
+
+                <div class="head">
+                    <div class="hair"></div>
+
+                    <div class="eye eye1">
+                        <span></span>
                     </div>
-                    <div class="body">✨</div>
-                    <div class="book">📖</div>
-                </div>
 
-                <div class="welcome-text">
-                    <span class="hello">👋 Welcome Little Champ!</span>
-                    <h2>Let's Learn with Unicorn Magic!</h2>
-                    <p>
-                        Reading is super fun and easy.
-                        Choose your favorite magic box below and start your magical journey!
-                    </p>
-                    <div class="learning-pills">
-                        <span>🌈 Magic Learn</span>
-                        <span>💗 Phonics Fun</span>
-                        <span>🏆 Super Star</span>
+                    <div class="eye eye2">
+                        <span></span>
                     </div>
-                </div>
-            </section>
 
-            <!-- Interactive Learning Cards -->
-            <section class="cards">
-                <!-- Reading Card -->
-                <div class="card reading-card">
-                    <div class="card-icon">📖</div>
-                    <h3>Reading Fun</h3>
-                    <p>Read magical stories and improve your reading skills step by step.</p>
-                    <button onclick="openReading()">Let's Read! 🚀</button>
+                    <div class="mouth"></div>
+
+                    <div class="cheek cheek1"></div>
+                    <div class="cheek cheek2"></div>
                 </div>
 
-                <!-- Phonics Card -->
-                <div class="card phonics-card">
-                    <div class="card-icon">🔤</div>
-                    <h3>Phonics Sound</h3>
-                    <p>Learn letter sounds with magical audio and fun blending games.</p>
-                    <button onclick="openPhonics()">Let's Play! 🎵</button>
-                </div>
+                <div class="body">🌈</div>
 
-                <!-- Progress Card -->
-                <div class="card progress-card">
-                    <div class="card-icon">👑</div>
-                    <h3>My Badges</h3>
-                    <p>Track your magic stars, collect badges, and celebrate progress!</p>
-                    <button onclick="openProgress()">View Badges! ⭐</button>
-                </div>
-            </section>
+                <div class="book">📖</div>
 
-            <!-- Motivation Bar -->
-            <section class="motivation">
-                <span>💖</span>
-                <h3>"You are magical! Every small step makes you smarter today!"</h3>
-                <span>🦄</span>
-            </section>
-        </div>
+            </div>
 
-        <!-- READING PAGE (DYNAMIC SECTION) -->
-        <div id="readingPage" style="display: none;">
-            <button onclick="goHome()" class="back-btn">⬅️ Back to Home</button>
-            <section class="hero" style="flex-direction: column; text-align: center;">
-                <h2>📚 Reading Corner 📖</h2>
-                <p>Pick a story to read aloud!</p>
-                <div style="background: white; padding: 25px; border-radius: 20px; color: #4a148c; font-size: 22px; margin-top: 20px; line-height: 1.8; max-width: 600px;">
-                    🦄 <strong>The Little Unicorn</strong><br>
-                    Once upon a time, a little unicorn saw a glowing rainbow. She jumped over the rainbow and found a magical star! ⭐
-                </div>
-            </section>
-        </div>
+            <div class="welcome-text">
+                <span class="hello">👋 Welcome!</span>
 
-        <!-- PHONICS PAGE (DYNAMIC SECTION) -->
-        <div id="phonicsPage" style="display: none;">
-            <button onclick="goHome()" class="back-btn">⬅️ Back to Home</button>
-            <section class="hero" style="flex-direction: column; text-align: center;">
-                <h2>🔤 Phonics World 🎵</h2>
-                <p>Click a letter to hear its magic sound!</p>
-                <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; justify-content: center;">
-                    <button onclick="playSound('A')" style="font-size: 30px; padding: 15px 30px; border-radius: 15px; border: none; background: #ff80ab; color: white; cursor: pointer;">A 🍎</button>
-                    <button onclick="playSound('B')" style="font-size: 30px; padding: 15px 30px; border-radius: 15px; border: none; background: #b388ff; color: white; cursor: pointer;">B 🎈</button>
-                    <button onclick="playSound('C')" style="font-size: 30px; padding: 15px 30px; border-radius: 15px; border: none; background: #80d8ff; color: white; cursor: pointer;">C 🐱</button>
-                </div>
-            </section>
-        </div>
+                <h2>Let's Learn Together!</h2>
 
-        <!-- PROGRESS PAGE (DYNAMIC SECTION) -->
-        <div id="progressPage" style="display: none;">
-            <button onclick="goHome()" class="back-btn">⬅️ Back to Home</button>
-            <section class="hero" style="flex-direction: column; text-align: center;">
-                <h2>👑 My Star Badges ⭐</h2>
-                <p>Look at all the magic stars you earned!</p>
-                <div style="font-size: 50px; margin-top: 20px;">
-                    ⭐ 🏆 🦄 💖 🌈
+                <p>
+                    Reading can be fun, easy and exciting.
+                    Choose an activity and start learning!
+                </p>
+
+                <div class="learning-pills">
+                    <span>🌟 Learn</span>
+                    <span>💗 Practice</span>
+                    <span>🏆 Improve</span>
                 </div>
-                <h3 style="margin-top: 15px; color: #6a1b9a;">You collected 5 Magic Stars!</h3>
-            </section>
-        </div>
+            </div>
+
+        </section>
+
+
+        <!-- Learning Cards -->
+        <section class="cards">
+
+            <!-- Reading -->
+            <div class="card reading-card">
+
+                <div class="card-icon">📚</div>
+
+                <h3>Reading</h3>
+
+                <p>
+                    Read passages and improve
+                    your reading skills.
+                </p>
+
+                <button onclick="openReading()">
+                    Let's Read! →
+                </button>
+
+            </div>
+
+
+            <!-- Phonics -->
+            <div class="card phonics-card">
+
+                <div class="card-icon">🔤</div>
+
+                <h3>Phonics</h3>
+
+                <p>
+                    Learn letter sounds and
+                    practice blending.
+                </p>
+
+                <button onclick="openPhonics()">
+                    Let's Learn! →
+                </button>
+
+            </div>
+
+
+            <!-- Progress -->
+            <div class="card progress-card">
+
+                <div class="card-icon">🏆</div>
+
+                <h3>My Progress</h3>
+
+                <p>
+                    See your learning journey
+                    and improvements.
+                </p>
+
+                <button onclick="openProgress()">
+                    Check Now! →
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- Motivation -->
+        <section class="motivation">
+            <span>💖</span>
+
+            <h3>
+                "Every small step leads to a big success!"
+            </h3>
+
+            <span>⭐</span>
+        </section>
+
 
         <footer>
-            💗 Made with Magic • Keep Learning • Stay Happy! 🌈
+            🦄 Keep Learning • Keep Growing • Stay Happy! 🌟
         </footer>
 
     </main>
 
-    <script src="script.js"></script>
+    <script src="/static/script.js"></script>
 
 </body>
 </html>
