@@ -449,8 +449,8 @@ function compareVoice(referenceAudio, userAudio) {
 /* ---------------- STARS + POP-UP (kid-friendly, no text to read) ---------------- */
 
 function getStars(score) {
-    if (score >= 85) return 3;   // accurate / correct sound
-    if (score >= 60) return 2;   // close, somewhat matching
+    if (score >= 65) return 3;   // accurate / correct sound
+    if (score >= 40) return 2;   // close, somewhat matching
     return 0;                    // wrong sound - no partial credit
 }
 
@@ -459,6 +459,11 @@ function showResult(score) {
     const totalStars = getStars(score);
 
     starsDiv.innerText = "⭐".repeat(totalStars) + "☆".repeat(3 - totalStars);
+
+    // Open chrome://inspect on the computer (with the emulator running) and
+    // check the Console tab to see this - use it to fine-tune the numbers
+    // above (65 / 40) for your mic and reference clip.
+    console.log("Voice match score:", score);
 
     showStarPopup(totalStars);
 }
@@ -585,62 +590,67 @@ async function startRecording() {
 
         console.log("Recording started");
 
-        setTimeout(function() {
+        // ---- Auto-stop as soon as the child stops talking ----
+        // Instead of always waiting a fixed 5 seconds, watch the mic
+        // volume: once it has heard speech and then gone quiet for
+        // SILENCE_HOLD_MS, stop right away. MAX_DURATION_MS is just a
+        // safety cap in case nothing is detected.
+        const monitorCtx = new AudioContext();
+        const micSource = monitorCtx.createMediaStreamSource(stream);
+        const analyser = monitorCtx.createAnalyser();
+        analyser.fftSize = 512;
+        micSource.connect(analyser);
+        const levelData = new Uint8Array(analyser.frequencyBinCount);
 
-            // First stop recording
+        const SPEECH_THRESHOLD = 12;   // raise this if background noise triggers it
+        const SILENCE_HOLD_MS = 800;   // how long a pause means "done talking"
+        const MAX_DURATION_MS = 5000;  // hard safety cap
+
+        let hasSpoken = false;
+        let silenceStartedAt = null;
+        const recordingStartedAt = Date.now();
+        let stopped = false;
+
+        function stopRecordingNow() {
+            if (stopped) return;
+            stopped = true;
+
             if (mediaRecorder && mediaRecorder.state === "recording") {
                 mediaRecorder.stop();
             }
 
-            // IMPORTANT: stop microphone
             stream.getTracks().forEach(function(track) {
                 track.stop();
             });
 
+            monitorCtx.close();
+
             console.log("Microphone stopped");
+        }
 
-        }, 5000);
+        function watchVolume() {
+            if (stopped) return;
 
-    } catch (error) {
-        console.log("Microphone error:", error);
-    }
-}
-function goToPrevious() {
-    window.location.href = "/letter_i";
-}
+            analyser.getByteTimeDomainData(levelData);
 
+            let sumSquares = 0;
+            for (let i = 0; i < levelData.length; i++) {
+                const v = (levelData[i] - 128) / 128;
+                sumSquares += v * v;
+            }
+            const rms = Math.sqrt(sumSquares / levelData.length) * 100;
 
-function goToNext() {
-    window.location.href = "/letter_k";
-}
+            if (rms > SPEECH_THRESHOLD) {
+                hasSpoken = true;
+                silenceStartedAt = null;
+            } else if (hasSpoken) {
+                if (silenceStartedAt === null) {
+                    silenceStartedAt = Date.now();
+                } else if (Date.now() - silenceStartedAt > SILENCE_HOLD_MS) {
+                    stopRecordingNow();
+                    return;
+                }
+            }
 
-</script>
-
-    <p>Sound : / jah /</p>
-
-    <h3>Pictures</h3>
-
-    <div class="card">
-    <img src="{{ url_for('static', filename='images/jeep.jpg') }}" >
-    <p>Jeep</p>
-    </div>
-
-    <div class="card">
-    <img src="{{ url_for('static', filename='images/juice.jpg') }}" >   
-    <p>Juice</p>
-    </div>    
-    <br><br>
-<button onclick="goToPrevious()">
-    ← Previous
-</button>
-
-
-<button onclick="goToNext()">
-    Next ➜
-</button>
-
-    
-
-
-</body>
-</html>
+            if (Date.now() - recordingStartedAt > MAX_DURATION_MS) {
+                stopRecordingNow();
