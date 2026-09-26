@@ -95,7 +95,7 @@
             text-align: center;
             position: relative;
             animation: modalBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            max-width: 320px;
+            max-width: 340px;
             width: 80%;
         }
 
@@ -134,7 +134,7 @@
         }
 
         .modal-msg {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: #333;
             margin-bottom: 20px;
@@ -285,7 +285,7 @@ async function startRecording() {
     }
 }
 
-// Improved Audio Energy & Frequency Comparison Algorithm
+// Advanced Audio Feature Extraction & Spectral Comparison Algorithm
 async function compareAndScore(userBlob) {
     try {
         if (audioCtx.state === 'suspended') {
@@ -300,64 +300,119 @@ async function compareAndScore(userBlob) {
         const originalArrayBuffer = await response.arrayBuffer();
         const originalAudioBuffer = await audioCtx.decodeAudioData(originalArrayBuffer);
 
-        const score = calculateVoiceScore(originalAudioBuffer, userAudioBuffer);
+        const score = await analyzePhoneticMatch(originalAudioBuffer, userAudioBuffer);
         
         displayStarPopup(score);
     } catch (err) {
         console.log("Comparison error:", err);
-        displayStarPopup(20); // Default to low score if audio fails
+        displayStarPopup(15); // Fallback low score if error occurs
     }
 }
 
-// Accurate Comparison based on Volume Energy & Peak Pattern
-function calculateVoiceScore(origBuf, userBuf) {
+// Spectral Envelope & Zero-Crossing Pitch Feature Comparison
+async function analyzePhoneticMatch(origBuf, userBuf) {
     const origData = origBuf.getChannelData(0);
     const userData = userBuf.getChannelData(0);
 
-    // Calculate Average Volume Energy (RMS) for User Recording
-    let userSumSquare = 0;
-    for (let i = 0; i < userData.length; i++) {
-        userSumSquare += userData[i] * userData[i];
-    }
-    const userRMS = Math.sqrt(userSumSquare / userData.length);
+    // 1. SILENCE & SPEECH ENERGY CHECK
+    const userTrimmed = extractActiveSpeech(userData);
+    const origTrimmed = extractActiveSpeech(origData);
 
-    // If user made almost no sound (Silence / Noise threshold)
-    if (userRMS < 0.015) {
-        return 10; // Very Low / Silence -> 1 Star
+    if (userTrimmed.length < 1000) {
+        return 10; // Speech இல்லை அல்லது அமைதி மட்டுமே இருந்தால் -> 1 Star
     }
 
-    // Compare Energy Profiles across 50 frames
-    const numFrames = 50;
-    const origStep = Math.floor(origData.length / numFrames);
-    const userStep = Math.floor(userData.length / numFrames);
+    // 2. FEATURE EXTRACTION - Frequency Distribution
+    const origBins = computeFrequencyBins(origTrimmed, origBuf.sampleRate);
+    const userBins = computeFrequencyBins(userTrimmed, userBuf.sampleRate);
 
-    let frameDiffs = 0;
+    // 3. ZERO-CROSSING RATE (Pitch / Sound Timbre Match)
+    const origZCR = computeZCR(origTrimmed);
+    const userZCR = computeZCR(userTrimmed);
 
-    for (let f = 0; f < numFrames; f++) {
-        let oSum = 0, uSum = 0;
-        for (let j = 0; j < origStep; j++) {
-            let oVal = origData[f * origStep + j] || 0;
-            oSum += oVal * oVal;
-        }
-        for (let j = 0; j < userStep; j++) {
-            let uVal = userData[f * userStep + j] || 0;
-            uSum += uVal * uVal;
-        }
+    // 4. COMPUTING SIMILARITY
+    const freqSimilarity = computeCosineSimilarity(origBins, userBins);
+    const zcrRatio = Math.min(origZCR, userZCR) / (Math.max(origZCR, userZCR) + 0.0001);
 
-        let oRmsFrame = Math.sqrt(oSum / origStep);
-        let uRmsFrame = Math.sqrt(uSum / userStep);
+    const durOrig = origTrimmed.length / origBuf.sampleRate;
+    const durUser = userTrimmed.length / userBuf.sampleRate;
+    const durRatio = Math.min(durOrig, durUser) / Math.max(durOrig, durUser);
 
-        frameDiffs += Math.abs(oRmsFrame - uRmsFrame);
-    }
+    // Weighted Overall Match Percentage
+    let matchScore = (freqSimilarity * 60) + (zcrRatio * 25) + (durRatio * 15);
+    
+    let finalPercentage = Math.round(Math.min(100, Math.max(0, matchScore)));
 
-    // Similarity percentage computation
-    let rawScore = 100 - (frameDiffs * 150 / numFrames);
-    let finalScore = Math.min(100, Math.max(0, rawScore));
-
-    return finalScore;
+    return finalPercentage;
 }
 
-// Beautiful Pop-up & Falling Stars Shower
+// Trim silence to isolate actual speech
+function extractActiveSpeech(data) {
+    let maxAmp = 0;
+    for (let i = 0; i < data.length; i++) {
+        if (Math.abs(data[i]) > maxAmp) maxAmp = Math.abs(data[i]);
+    }
+    const threshold = Math.max(0.02, maxAmp * 0.15); // Dynamic Noise Threshold
+
+    let start = 0;
+    while (start < data.length && Math.abs(data[start]) < threshold) {
+        start++;
+    }
+
+    let end = data.length - 1;
+    while (end > start && Math.abs(data[end]) < threshold) {
+        end--;
+    }
+
+    return data.subarray(start, end + 1);
+}
+
+// Divide Audio into 8 Frequency Energy Band Bins
+function computeFrequencyBins(samples, sampleRate) {
+    const bins = new Float32Array(8);
+    const binSize = Math.floor(samples.length / 8);
+
+    for (let b = 0; b < 8; b++) {
+        let sumSq = 0;
+        let start = b * binSize;
+        let end = Math.min(samples.length, start + binSize);
+        
+        for (let i = start; i < end; i++) {
+            sumSq += samples[i] * samples[i];
+        }
+        bins[b] = Math.sqrt(sumSq / (end - start + 1));
+    }
+    return bins;
+}
+
+// Zero-Crossing Rate calculation (Noise / Tone Pitch feature)
+function computeZCR(samples) {
+    let crossings = 0;
+    for (let i = 1; i < samples.length; i++) {
+        if ((samples[i] >= 0 && samples[i - 1] < 0) || (samples[i] < 0 && samples[i - 1] >= 0)) {
+            crossings++;
+        }
+    }
+    return crossings / samples.length;
+}
+
+// Cosine Similarity between two feature vectors
+function computeCosineSimilarity(vecA, vecB) {
+    let dotProduct = 0;
+    let normA = 0;
+    let normB = 0;
+
+    for (let i = 0; i < vecA.length; i++) {
+        dotProduct += vecA[i] * vecB[i];
+        normA += vecA[i] * vecA[i];
+        normB += vecB[i] * vecB[i];
+    }
+
+    if (normA === 0 || normB === 0) return 0;
+    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
+// Pop-up & Falling Stars Display
 function displayStarPopup(score) {
     const modal = document.getElementById("starModal");
     const modalTitle = document.getElementById("modalTitle");
@@ -368,29 +423,30 @@ function displayStarPopup(score) {
 
     let starCount = 1;
     let titleText = "Try Again! 😃";
-    let messageText = "Say / jah / loudly and clearly!";
+    let messageText = "Say / jah / clearly!";
 
-    if (score >= 60) {
-        starCount = 3;
+    // STRICT PHONETIC SCORE THRESHOLDS
+    if (score >= 68) {
+        starCount = 3; // Excellent Match
         titleText = "Superstar! 🌟";
         messageText = "Perfect Pronunciation!";
-    } else if (score >= 35) {
-        starCount = 2;
+    } else if (score >= 45) {
+        starCount = 2; // Medium Match
         titleText = "Good Job! 👍";
-        messageText = "You are almost there!";
+        messageText = "Almost correct, try once more!";
     } else {
-        starCount = 1;
+        starCount = 1; // Wrong Sound or Silence
         titleText = "Try Again! 😃";
-        messageText = "Listen to the sound and repeat!";
+        messageText = "Incorrect sound! Listen and repeat!";
     }
 
     modalTitle.innerText = titleText;
     modalMsg.innerText = messageText;
 
-    // Show Popup
+    // Display Popup Modal
     modal.style.display = "flex";
 
-    // Add Stars sequentially with bounce drop animation
+    // Add Stars with animated bounce drop
     for (let i = 0; i < starCount; i++) {
         setTimeout(() => {
             const starSpan = document.createElement("span");
@@ -400,11 +456,13 @@ function displayStarPopup(score) {
         }, i * 250);
     }
 
-    // Trigger Falling Stars Celebration Shower from top
-    createFallingStarsShower(starCount * 10);
+    // Trigger Falling Stars Shower only if 2 or 3 stars
+    if (starCount >= 2) {
+        createFallingStarsShower(starCount * 10);
+    }
 }
 
-// Function to generate falling stars effect across screen
+// Falling Stars Celebration Shower
 function createFallingStarsShower(count) {
     const starIcons = ["⭐", "✨", "🌟", "🎉"];
     
