@@ -1,32 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Letter J Learning</title>
 
     <style>
-        body {
-            background-color: #FFF8DC;
-            text-align: center;
-            font-family: 'Arial', sans-serif;
-            overflow-x: hidden;
-            position: relative;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .letter {
-            font-size: 80px;
-            font-weight: bold;
-            color: #2C3E50;
-            text-align: center;
-            margin: 15px;
-            display: inline-block;
-        }
-
         .card {
-            width: 170px;
+            width: 180px;
             height: 180px;
             border: 3px solid #333;
             border-radius: 15px;
@@ -34,8 +13,6 @@
             text-align: center;
             margin: 10px;
             padding: 10px;
-            background: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .card img {
@@ -47,138 +24,154 @@
         .card p {
             font-size: 20px;
             font-weight: bold;
-            margin-top: 10px;
-            color: #333;
         }
 
-        button {
-            background-color: #8B0000;
-            color: white;
-            font-size: 18px;
+        .letter {
+            font-size: 80px;
             font-weight: bold;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            margin: 8px;
-            transition: transform 0.2s, background-color 0.2s;
-        }
-
-        button:hover {
-            background-color: #5a1818;
-            transform: scale(1.05);
-        }
-
-        #myRecording {
-            margin-top: 15px;
-        }
-
-        @keyframes bounce {
-            0%   { transform: translateY(0); }
-            50%  { transform: translateY(-15px); }
-            100% { transform: translateY(0); }
-        }
-
-        .animate {
-            animation: bounce 0.5s ease-in-out;
-        }
-
-        /* --- POPUP MODAL FOR STARS --- */
-        .star-modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .star-modal-card {
-            background: #ffffff;
-            border-radius: 25px;
-            padding: 30px 40px;
-            border: 5px solid #FFD700;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            color: black;
             text-align: center;
-            position: relative;
-            animation: modalBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            max-width: 340px;
-            width: 80%;
-        }
-
-        @keyframes modalBounce {
-            0% { transform: scale(0.3) translateY(-100px); opacity: 0; }
-            100% { transform: scale(1) translateY(0); opacity: 1; }
-        }
-
-        .modal-title {
-            font-size: 26px;
-            font-weight: bold;
-            color: #d9534f;
-            margin-bottom: 10px;
-        }
-
-        .modal-stars {
-            font-size: 60px;
-            margin: 10px 0;
-            min-height: 75px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .star-anim {
+            margin: 20px;
             display: inline-block;
-            animation: dropStar 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-            filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.2));
         }
+        button {
+    background-color: brown;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 20px;
+}
 
-        @keyframes dropStar {
-            0% { transform: translateY(-120px) scale(0) rotate(-180deg); opacity: 0; }
-            70% { transform: translateY(10px) scale(1.3) rotate(20deg); opacity: 1; }
-            100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
-        }
+button:hover {
+    background-color: brown;
+}
+body{
+    background-color:#FFF8DC;
+    text-align:center;
+    font-family:Arial, sans-serif;
+}
+@keyframes bounce {
+    0%   { transform: translateY(0); }
+    50%  { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
 
-        .modal-msg {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 20px;
-        }
+.animate {
+    animation: bounce 0.6s;
+}
 
-        .close-btn {
-            background-color: #28a745;
-            color: white;
-            font-size: 18px;
-            padding: 10px 25px;
-            border-radius: 30px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            margin: 0;
-        }
+/* ---- Star popup for kids: stars fall in from above with a bounce ---- */
+.star-popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+}
 
-        /* --- FALLING STARS SHOWER --- */
-        .falling-star {
-            position: fixed;
-            top: -50px;
-            font-size: 30px;
-            z-index: 999;
-            pointer-events: none;
-            animation: fallDown linear forwards;
-        }
+.star-popup-overlay.show {
+    display: flex;
+}
 
-        @keyframes fallDown {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
-        }
+.star-popup-box {
+    border: 6px solid brown;
+    border-radius: 30px;
+    padding: 25px 35px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    max-width: 320px;
+    transition: background 0.3s;
+}
+
+.star-popup-box.great {
+    background: linear-gradient(160deg, #FFF3B0, #FFD93D 70%);
+    border-color: #E8A800;
+}
+
+.star-popup-box.okay {
+    background: linear-gradient(160deg, #D4F4DD, #8DE3A6 70%);
+    border-color: #3CAA5C;
+}
+
+.star-popup-box.retry {
+    background: linear-gradient(160deg, #FFE0D6, #FFB199 70%);
+    border-color: #E06B4D;
+}
+
+.popup-face {
+    font-size: 60px;
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+.falling-star {
+    display: inline-block;
+    font-size: 46px;
+    opacity: 0;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.25));
+    transform: translateY(-250px) rotate(-30deg);
+    animation: starFall 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes starFall {
+    0%   { opacity: 0; transform: translateY(-250px) rotate(-30deg); }
+    70%  { opacity: 1; transform: translateY(15px) rotate(10deg); }
+    85%  { transform: translateY(-8px) rotate(-5deg); }
+    100% { opacity: 1; transform: translateY(0) rotate(0deg); }
+}
+
+.popup-close-btn {
+    margin-top: 10px;
+    background-color: brown;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    font-size: 26px;
+    cursor: pointer;
+}
+
+/* Sparkly background stars that rain down gently behind the popup box */
+.bg-sparkle {
+    position: fixed;
+    top: -40px;
+    font-size: 34px;
+    opacity: 1;
+    z-index: 998;
+    pointer-events: none;
+    animation: sparkleRain linear forwards;
+}
+
+.bg-sparkle.tier-great {
+    color: #880E4F;
+    filter: drop-shadow(0 0 6px #C2185B);
+}
+
+.bg-sparkle.tier-okay {
+    color: #AD1457;
+    filter: drop-shadow(0 0 6px #E91E63);
+}
+
+.bg-sparkle.tier-retry {
+    color: #D81B60;
+    filter: drop-shadow(0 0 6px #F06292);
+}
+
+@keyframes sparkleRain {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(200deg); opacity: 0.5; }
+}
     </style>
+
 </head>
+
 
 <body>
 
@@ -186,326 +179,755 @@
         J  j
     </div>
     
-    <br>
 
-    <button onclick="playIntro()">🔤 This is Letter J</button>
-    <button onclick="playSound()">🔊 Hear the Sound</button>
-    <button id="recBtn" onclick="startRecording()">🎤 Record My Voice</button>
+<button onclick="playIntro()">🔤 This is Letter J</button>
+<button onclick="playSound()">🔊 Hear the Sound</button>
+<button onclick="startRecording()">🎤 Record My Voice</button>
+<div id="myRecording"></div>
+<div id="stars" style="font-size: 40px; letter-spacing: 8px;"></div>
 
-    <div id="myRecording"></div>
-
-    <!-- POPUP MODAL FOR STAR RATING -->
-    <div id="starModal" class="star-modal-overlay">
-        <div class="star-modal-card">
-            <div id="modalTitle" class="modal-title">Awesome!</div>
-            <div id="modalStars" class="modal-stars"></div>
-            <div id="modalMsg" class="modal-msg">Great job!</div>
-            <button class="close-btn" onclick="closeModal()">Try Again 🔄</button>
-        </div>
+<div id="starPopupOverlay" class="star-popup-overlay" onclick="closeStarPopup(event)">
+    <div id="popupBox" class="star-popup-box" onclick="event.stopPropagation()">
+        <div id="popupFace" class="popup-face"></div>
+        <div id="popupStars"></div>
+        <button class="popup-close-btn" onclick="closeStarPopup(event)">👍</button>
     </div>
+</div>
 
-    <!-- Audio Elements with Cache Fix -->
-    <audio id="jSound" preload="auto">
-        <source src="{{ url_for('static', filename='sounds/j_sound.mp3') }}" type="audio/mpeg">
-    </audio>
+<audio id="repeatSound">
+    <source src="{{ url_for('static', filename='sounds/j_repeat.mp3') }}" type="audio/mpeg">
+</audio>
+
+<audio id="jSound">
+    <source src="{{ url_for('static', filename='sounds/j_sound.mp3')}}" type="audio/mpeg">
+</audio>
 
 <script>
 
 function playIntro() {
-    let audio = new Audio("{{ url_for('static', filename='sounds/j_intro.mp3') }}");
-    audio.play().catch(e => console.log("Intro sound error:", e));
+    let audio = new Audio(
+        "{{ url_for('static', filename='sounds/j_intro.mp3') }}"
+    );
+
+    audio.play();
 }
 
-// 🔊 FIX FOR AUDIO STOPPING MIDWAY
 function playSound() {
     let audio = document.getElementById("jSound");
     let letter = document.querySelector(".letter");
 
-    if (audio) {
-        audio.pause();
-        audio.currentTime = 0; // Reset audio to start
-        audio.play().catch(e => console.log("Sound play error:", e));
+    audio.currentTime = 0;
+    audio.play();
 
-        // Animate Letter
-        letter.classList.remove("animate");
-        void letter.offsetWidth; // Trigger reflow
-        letter.classList.add("animate");
-    }
+    letter.classList.remove("animate");
+    void letter.offsetWidth;
+    letter.classList.add("animate");
 }
 
+let recognition;
 let mediaRecorder;
 let audioChunks = [];
-let audioCtx;
 
-async function startRecording() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioChunks = [];
+/* ---------------- VOICE COMPARISON (same fixed logic as Letter E) ----------------
+   1. Trims silence from both clips (adaptive threshold, not a fixed number)
+   2. Averages a real FFT spectrum over the WHOLE clip (not just the first frame)
+   3. Compares spectral SHAPE (cosine similarity, cubed to sharpen differences)
+   4. Compares spectral CENTROID (where the sound's energy sits - the strongest
+      signal for telling different letter sounds apart) - acts as a gate so a
+      wrong sound can't fake a high score just by having okay shape/duration
+   5. Compares duration (softened - speakers naturally differ in timing)
+------------------------------------------------------------------------------- */
 
-        mediaRecorder = new MediaRecorder(stream);
+function trimSilence(data, sampleRate) {
+    const frameSize = Math.floor(sampleRate * 0.02); // 20ms frames
 
-        mediaRecorder.ondataavailable = function(event) {
-            if (event.data.size > 0) {
-                audioChunks.push(event.data);
-            }
-        };
-
-        mediaRecorder.onstop = async function() {
-            const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-            const audioURL = URL.createObjectURL(audioBlob);
-
-            const audio = document.createElement("audio");
-            audio.controls = true;
-            audio.src = audioURL;
-
-            document.getElementById("myRecording").innerHTML = "";
-            document.getElementById("myRecording").appendChild(audio);
-
-            // Compare recorded voice
-            await compareAndScore(audioBlob);
-        };
-
-        mediaRecorder.start();
-
-        const recBtn = document.getElementById("recBtn");
-        recBtn.innerText = "🛑 Listening...";
-
-        setTimeout(function() {
-            if (mediaRecorder && mediaRecorder.state === "recording") {
-                mediaRecorder.stop();
-            }
-
-            stream.getTracks().forEach(track => track.stop());
-            recBtn.innerText = "🎤 Record My Voice";
-
-        }, 3000); // 3 seconds recording time
-
-    } catch (error) {
-        alert("Please allow microphone access in your browser!");
+    let peak = 0;
+    for (let i = 0; i < data.length; i++) {
+        peak = Math.max(peak, Math.abs(data[i]));
     }
-}
+    const threshold = Math.max(peak * 0.15, 0.005);
 
-// 🎯 ACCURATE PHONICS & STAR EVALUATION
-async function compareAndScore(userBlob) {
-    try {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-            await audioCtx.resume();
-        }
-
-        // 1. Decode User Recorded Audio
-        const userArrayBuffer = await userBlob.arrayBuffer();
-        const userAudioBuffer = await audioCtx.decodeAudioData(userArrayBuffer);
-
-        // 2. Fetch Original Reference Sound
-        const jSoundElement = document.getElementById("jSound");
-        const sourceUrl = jSoundElement.querySelector("source").src;
-        const response = await fetch(sourceUrl);
-        const originalArrayBuffer = await response.arrayBuffer();
-        const originalAudioBuffer = await audioCtx.decodeAudioData(originalArrayBuffer);
-
-        // 3. Compute Phonics Score
-        const score = calculateStrictPhonicsScore(originalAudioBuffer, userAudioBuffer);
-        
-        displayStarPopup(score);
-
-    } catch (err) {
-        console.error("Comparison error:", err);
-        displayStarPopup(20); // Fallback for error/silence
-    }
-}
-
-function calculateStrictPhonicsScore(origBuf, userBuf) {
-    const origData = origBuf.getChannelData(0);
-    const userData = userBuf.getChannelData(0);
-
-    // 1. Trim Silence & Background Noise
-    const origClean = trimSilence(origData);
-    const userClean = trimSilence(userData);
-
-    // Check if recorded audio is empty/too quiet
-    if (userClean.length < (userBuf.sampleRate * 0.15)) {
-        console.log("Audio too silent or short!");
-        return 10; // Forced 1 Star
-    }
-
-    // 2. Compare Frequency Energies
-    const bands = 16;
-    const origSpec = getSpeechBands(origClean, bands);
-    const userSpec = getSpeechBands(userClean, bands);
-
-    let spectralDiff = 0;
-    for (let i = 0; i < bands; i++) {
-        spectralDiff += Math.abs(origSpec[i] - userSpec[i]);
-    }
-    spectralDiff = spectralDiff / bands;
-
-    // 3. Compare Zero Crossing Rates (Speech Sharpness)
-    const origZCR = getZCR(origClean);
-    const userZCR = getZCR(userClean);
-    let zcrDiff = Math.abs(origZCR - userZCR);
-
-    // 4. Dynamic Percentage Scoring
-    let similarity = 100 - (spectralDiff * 140) - (zcrDiff * 200);
-    let finalScore = Math.max(5, Math.min(100, Math.round(similarity)));
-
-    console.log("Calculated Speech Score:", finalScore);
-    return finalScore;
-}
-
-function getSpeechBands(buffer, bands) {
-    let spectrum = new Float32Array(bands);
-    let chunkSize = Math.floor(buffer.length / bands);
-
-    for (let i = 0; i < bands; i++) {
-        let sum = 0;
-        let start = i * chunkSize;
-        let end = Math.min(buffer.length, start + chunkSize);
-
-        for (let j = start; j < end; j++) {
-            sum += Math.abs(buffer[j]);
-        }
-        spectrum[i] = sum / (end - start + 1);
-    }
-
-    // Normalization
-    let maxEnergy = Math.max(...spectrum);
-    if (maxEnergy > 0) {
-        for (let i = 0; i < bands; i++) spectrum[i] /= maxEnergy;
-    }
-
-    return spectrum;
-}
-
-function trimSilence(buffer) {
-    let maxVal = 0;
-    for (let i = 0; i < buffer.length; i++) {
-        if (Math.abs(buffer[i]) > maxVal) maxVal = Math.abs(buffer[i]);
-    }
-    
-    let threshold = maxVal * 0.20; // Ignore under 20% volume
     let start = 0;
-    while (start < buffer.length && Math.abs(buffer[start]) < threshold) start++;
-    
-    let end = buffer.length - 1;
-    while (end > start && Math.abs(buffer[end]) < threshold) end--;
-    
-    return buffer.subarray(start, end + 1);
+    let end = data.length;
+
+    for (let i = 0; i < data.length; i += frameSize) {
+        let sum = 0;
+        const endI = Math.min(i + frameSize, data.length);
+        for (let j = i; j < endI; j++) sum += data[j] * data[j];
+        const rms = Math.sqrt(sum / (endI - i));
+        if (rms > threshold) { start = i; break; }
+    }
+
+    for (let i = data.length - frameSize; i >= 0; i -= frameSize) {
+        let sum = 0;
+        const endI = Math.min(i + frameSize, data.length);
+        for (let j = i; j < endI; j++) sum += data[j] * data[j];
+        const rms = Math.sqrt(sum / (endI - i));
+        if (rms > threshold) { end = endI; break; }
+    }
+
+    if (end <= start) return data;
+    return data.slice(start, end);
 }
 
-function getZCR(buffer) {
-    let count = 0;
-    for (let i = 1; i < buffer.length; i++) {
-        if ((buffer[i] >= 0 && buffer[i-1] < 0) || (buffer[i] < 0 && buffer[i-1] >= 0)) {
+function nextPow2(n) {
+    let p = 1;
+    while (p < n) p *= 2;
+    return p;
+}
+
+function fft(re, im) {
+    const n = re.length;
+
+    for (let i = 1, j = 0; i < n; i++) {
+        let bit = n >> 1;
+        for (; j & bit; bit >>= 1) j ^= bit;
+        j ^= bit;
+        if (i < j) {
+            [re[i], re[j]] = [re[j], re[i]];
+            [im[i], im[j]] = [im[j], im[i]];
+        }
+    }
+
+    for (let len = 2; len <= n; len <<= 1) {
+        const ang = -2 * Math.PI / len;
+        const wr = Math.cos(ang), wi = Math.sin(ang);
+
+        for (let i = 0; i < n; i += len) {
+            let curWr = 1, curWi = 0;
+
+            for (let j = 0; j < len / 2; j++) {
+                const ur = re[i + j], ui = im[i + j];
+
+                const vr =
+                    re[i + j + len / 2] * curWr -
+                    im[i + j + len / 2] * curWi;
+
+                const vi =
+                    re[i + j + len / 2] * curWi +
+                    im[i + j + len / 2] * curWr;
+
+                re[i + j] = ur + vr;
+                im[i + j] = ui + vi;
+
+                re[i + j + len / 2] = ur - vr;
+                im[i + j + len / 2] = ui - vi;
+
+                const nWr = curWr * wr - curWi * wi;
+                const nWi = curWr * wi + curWi * wr;
+
+                curWr = nWr;
+                curWi = nWi;
+            }
+        }
+    }
+}
+
+function spectrumOfFrame(frame, sampleRate, numBands, minFreq, maxFreq) {
+    const n = frame.length;
+    const re = new Float64Array(n);
+    const im = new Float64Array(n);
+
+    for (let i = 0; i < n; i++) {
+        const w =
+            0.54 -
+            0.46 * Math.cos((2 * Math.PI * i) / (n - 1));
+
+        re[i] = frame[i] * w;
+    }
+
+    fft(re, im);
+
+    const half = n / 2;
+
+    const magnitude = new Float64Array(half);
+
+    for (let i = 0; i < half; i++) {
+        magnitude[i] =
+            Math.sqrt(re[i] * re[i] + im[i] * im[i]);
+    }
+
+    const bands = new Array(numBands).fill(0);
+    const nyquist = sampleRate / 2;
+
+    for (let b = 0; b < numBands; b++) {
+
+        const f1 =
+            minFreq *
+            Math.pow(maxFreq / minFreq, b / numBands);
+
+        const f2 =
+            minFreq *
+            Math.pow(maxFreq / minFreq, (b + 1) / numBands);
+
+        const bin1 =
+            Math.floor((f1 / nyquist) * half);
+
+        const bin2 =
+            Math.max(
+                bin1 + 1,
+                Math.floor((f2 / nyquist) * half)
+            );
+
+        let sum = 0, count = 0;
+
+        for (
+            let k = bin1;
+            k < bin2 && k < half;
+            k++
+        ) {
+            sum += magnitude[k];
             count++;
         }
+
+        bands[b] =
+            count > 0 ? sum / count : 0;
     }
-    return count / buffer.length;
+
+    return bands;
 }
 
-// 🌟 STAR POPUP DISPLAY SYSTEM
-function displayStarPopup(score) {
-    const modal = document.getElementById("starModal");
-    const modalTitle = document.getElementById("modalTitle");
-    const modalStars = document.getElementById("modalStars");
-    const modalMsg = document.getElementById("modalMsg");
+function getAudioFeatures(
+    data,
+    sampleRate,
+    numBands = 16,
+    minFreq = 150,
+    maxFreq = 3500
+) {
 
-    modalStars.innerHTML = "";
+    const frameSize =
+        nextPow2(
+            Math.min(
+                Math.max(data.length, 256),
+                2048
+            )
+        );
 
-    let starCount = 1;
-    let titleText = "Try Again! 😃";
-    let messageText = "Say / jah / clearly!";
+    const hop = Math.floor(frameSize / 2);
 
-    // ACCURATE STAR CUT-OFFS
-    if (score >= 68) {
-        starCount = 3; // Excellent
-        titleText = "Superstar! 🌟";
-        messageText = "Perfect Pronunciation!";
-    } else if (score >= 38) {
-        starCount = 2; // Good Try
-        titleText = "Good Job! 👍";
-        messageText = "Almost correct, try once more!";
-    } else {
-        starCount = 1; // Wrong / Low Audio
-        titleText = "Try Again! 😃";
-        messageText = "Incorrect sound! Listen and repeat!";
+    const totals =
+        new Array(numBands).fill(0);
+
+    let frameCount = 0;
+
+    for (
+        let start = 0;
+        start + frameSize <= data.length || frameCount === 0;
+        start += hop
+    ) {
+
+        const frame =
+            new Float64Array(frameSize);
+
+        for (let i = 0; i < frameSize; i++) {
+
+            const idx = start + i;
+
+            frame[i] =
+                idx < data.length
+                    ? data[idx]
+                    : 0;
+        }
+
+        const bands =
+            spectrumOfFrame(
+                frame,
+                sampleRate,
+                numBands,
+                minFreq,
+                maxFreq
+            );
+
+        for (let b = 0; b < numBands; b++) {
+            totals[b] += bands[b];
+        }
+
+        frameCount++;
+
+        if (start + frameSize >= data.length)
+            break;
     }
 
-    modalTitle.innerText = titleText;
-    modalMsg.innerText = messageText;
-    modal.style.display = "flex";
+    const avg =
+        totals.map(
+            v => v / frameCount
+        );
 
-    for (let i = 0; i < starCount; i++) {
-        setTimeout(() => {
-            const starSpan = document.createElement("span");
-            starSpan.innerText = "⭐";
-            starSpan.className = "star-anim";
-            modalStars.appendChild(starSpan);
-        }, i * 200);
+    const centers = [];
+
+    for (let b = 0; b < numBands; b++) {
+
+        const f1 =
+            minFreq *
+            Math.pow(
+                maxFreq / minFreq,
+                b / numBands
+            );
+
+        const f2 =
+            minFreq *
+            Math.pow(
+                maxFreq / minFreq,
+                (b + 1) / numBands
+            );
+
+        centers.push(
+            Math.sqrt(f1 * f2)
+        );
     }
 
-    if (starCount >= 2) {
-        createFallingStarsShower(starCount * 8);
+    let weightedSum = 0,
+        energySum = 0;
+
+    for (let b = 0; b < numBands; b++) {
+
+        weightedSum +=
+            avg[b] * centers[b];
+
+        energySum += avg[b];
     }
+
+    const centroid =
+        energySum > 0
+            ? weightedSum / energySum
+            : minFreq;
+
+    const compressed =
+        avg.map(
+            v => Math.log10(1 + v * 50)
+        );
+
+    const total =
+        compressed.reduce(
+            (a, b) => a + b,
+            0
+        ) || 1;
+
+    const shapeBands =
+        compressed.map(
+            v => v / total
+        );
+
+    return {
+        shapeBands,
+        centroid
+    };
 }
 
-function createFallingStarsShower(count) {
-    const starIcons = ["⭐", "✨", "🌟"];
-    
+function cosineSimilarity(a, b) {
+
+    let dot = 0,
+        normA = 0,
+        normB = 0;
+
+    for (let i = 0; i < a.length; i++) {
+
+        dot += a[i] * b[i];
+
+        normA += a[i] * a[i];
+
+        normB += b[i] * b[i];
+    }
+
+    if (normA === 0 || normB === 0)
+        return 0;
+
+    return dot /
+        (Math.sqrt(normA) *
+         Math.sqrt(normB));
+}
+
+function rmsOf(data) {
+
+    let sum = 0;
+
+    for (let i = 0; i < data.length; i++)
+        sum += data[i] * data[i];
+
+    return Math.sqrt(
+        sum / data.length
+    );
+}
+
+function compareVoice(
+    referenceAudio,
+    userAudio
+) {
+
+    const refRaw =
+        referenceAudio.getChannelData(0);
+
+    const userRaw =
+        userAudio.getChannelData(0);
+
+    const refData =
+        trimSilence(
+            refRaw,
+            referenceAudio.sampleRate
+        );
+
+    const userData =
+        trimSilence(
+            userRaw,
+            userAudio.sampleRate
+        );
+
+    if (
+        rmsOf(userData) < 0.004 ||
+        userData.length <
+        userAudio.sampleRate * 0.05
+    ) {
+        return 0;
+    }
+
+    const refFeat =
+        getAudioFeatures(
+            refData,
+            referenceAudio.sampleRate
+        );
+
+    const userFeat =
+        getAudioFeatures(
+            userData,
+            userAudio.sampleRate
+        );
+
+    const rawShapeScore =
+        Math.max(
+            0,
+            cosineSimilarity(
+                refFeat.shapeBands,
+                userFeat.shapeBands
+            )
+        );
+
+    const shapeScore =
+        Math.pow(
+            rawShapeScore,
+            3
+        );
+
+    const centroidRatio =
+        Math.min(
+            refFeat.centroid,
+            userFeat.centroid
+        ) /
+        Math.max(
+            refFeat.centroid,
+            userFeat.centroid,
+            1
+        );
+
+    const refDuration =
+        refData.length /
+        referenceAudio.sampleRate;
+
+    const userDuration =
+        userData.length /
+        userAudio.sampleRate;
+
+    const rawRatio =
+        Math.min(
+            refDuration,
+            userDuration
+        ) /
+        Math.max(
+            refDuration,
+            userDuration,
+            0.01
+        );
+
+    const durationScore =
+        Math.sqrt(rawRatio);
+
+    const baseScore =
+        shapeScore * 0.75 +
+        durationScore * 0.25;
+
+    const CENTROID_CUTOFF = 0.85;
+
+    const centroidPenalty =
+        centroidRatio >= CENTROID_CUTOFF
+            ? 1
+            : Math.pow(
+                centroidRatio /
+                CENTROID_CUTOFF,
+                4
+            );
+
+    const finalScore =
+        baseScore *
+        centroidPenalty *
+        100;
+
+    return Math.round(
+        Math.max(
+            0,
+            Math.min(
+                100,
+                finalScore
+            )
+        )
+    );
+}
+
+/* ---------------- STARS + POP-UP (same as Letter E) ---------------- */
+
+function getStars(score) {
+
+    if (score >= 85) return 3;
+    if (score >= 60) return 2;
+
+    return 0;
+}
+
+function showResult(score) {
+
+    const starsDiv =
+        document.getElementById("stars");
+
+    const totalStars =
+        getStars(score);
+
+    starsDiv.innerText =
+        "⭐".repeat(totalStars) +
+        "☆".repeat(3 - totalStars);
+
+    showStarPopup(totalStars);
+}
+
+function showStarPopup(totalStars) {
+
+    const overlay =
+        document.getElementById(
+            "starPopupOverlay"
+        );
+
+    const popupBox =
+        document.getElementById(
+            "popupBox"
+        );
+
+    const popupStars =
+        document.getElementById(
+            "popupStars"
+        );
+
+    const popupFace =
+        document.getElementById(
+            "popupFace"
+        );
+
+    popupBox.classList.remove(
+        "great",
+        "okay",
+        "retry"
+    );
+
+    let face;
+
+    if (totalStars === 3) {
+
+        face = "😃";
+
+        popupBox.classList.add(
+            "great"
+        );
+
+    }
+    else if (totalStars === 2) {
+
+        face = "🙂";
+
+        popupBox.classList.add(
+            "okay"
+        );
+
+    }
+    else {
+
+        face = "🤗";
+
+        popupBox.classList.add(
+            "retry"
+        );
+    }
+
+    popupFace.textContent = face;
+
+    popupStars.innerHTML = "";
+
+    for (let i = 0; i < 3; i++) {
+
+        const span =
+            document.createElement(
+                "span"
+            );
+
+        span.className =
+            "falling-star";
+
+        span.style.animationDelay =
+            (i * 0.25) + "s";
+
+        span.textContent =
+            i < totalStars
+                ? "⭐"
+                : "☆";
+
+        popupStars.appendChild(
+            span
+        );
+    }
+
+    overlay.classList.add("show");
+
+    spawnSparkleRain(totalStars);
+}
+
+function spawnSparkleRain(totalStars) {
+
+    const overlay =
+        document.getElementById(
+            "starPopupOverlay"
+        );
+
+    const sparkles =
+        ["★", "✦", "✧", "✩"];
+
+    const tierClass =
+        totalStars === 3
+            ? "tier-great"
+            : totalStars === 2
+                ? "tier-okay"
+                : "tier-retry";
+
+    const count = 14;
+
     for (let i = 0; i < count; i++) {
-        setTimeout(() => {
-            const star = document.createElement("div");
-            star.className = "falling-star";
-            star.innerText = starIcons[Math.floor(Math.random() * starIcons.length)];
-            star.style.left = Math.random() * 95 + "vw";
-            star.style.animationDuration = (Math.random() * 2 + 1.5) + "s";
-            star.style.fontSize = (Math.random() * 15 + 25) + "px";
-            
-            document.body.appendChild(star);
 
-            setTimeout(() => star.remove(), 3000);
-        }, i * 100);
+        const s =
+            document.createElement(
+                "span"
+            );
+
+        s.className =
+            "bg-sparkle " +
+            tierClass;
+
+        s.textContent =
+            sparkles[
+                Math.floor(
+                    Math.random() *
+                    sparkles.length
+                )
+            ];
+
+        s.style.left =
+            Math.random() * 100 +
+            "vw";
+
+        s.style.animationDuration =
+            (2 + Math.random() * 1.5) +
+            "s";
+
+        s.style.animationDelay =
+            (Math.random() * 0.8) +
+            "s";
+
+        overlay.appendChild(s);
+
+        setTimeout(
+            () => s.remove(),
+            4000
+        );
     }
 }
 
-function closeModal() {
-    document.getElementById("starModal").style.display = "none";
+function closeStarPopup(event) {
+
+    document.getElementById(
+        "starPopupOverlay"
+    ).classList.remove("show");
 }
 
-function goToPrevious() {
-    window.location.href = "/letter_i";
-}
+/* ---------------- END VOICE COMPARISON + STARS SECTION ---------------- */
 
-function goToNext() {
-    window.location.href = "/letter_k";
-}
+async function startRecording() {
 
-</script>
+    try {
 
-    <p>Sound : / jah /</p>
+        const stream =
+            await navigator.mediaDevices.getUserMedia({
+                audio: true
+            });
 
-    <h3>Pictures</h3>
+        audioChunks = [];
 
-    <div class="card">
-        <!-- onerror ஃபைல் இல்லாவிட்டாலும் படத்தைக் காட்டும் -->
-        <img src="{{ url_for('static', filename='images/jeep.jpg') }}" 
-             onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/3202/3202027.png';" 
-             alt="Jeep">
-        <p>Jeep</p>
-    </div>
+        mediaRecorder =
+            new MediaRecorder(stream);
 
-    <div class="card">
-        <img src="{{ url_for('static', filename='images/juice.jpg') }}" 
-             onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/2442/2442019.png';" 
-             alt="Juice">   
-        <p>Juice</p>
-    </div>    
-    <br><br>
+        mediaRecorder.ondataavailable =
+            function(event) {
 
-    <button onclick="goToPrevious()">← Previous</button>
-    <button onclick="goToNext()">Next ➜</button>
+                if (event.data.size > 0) {
+                    audioChunks.push(
+                        event.data
+                    );
+                }
+            };
 
-</body>
-</html>
+        mediaRecorder.onstop =
+            async function() {
+
+                const audioBlob =
+                    new Blob(
+                        audioChunks,
+                        {
+                            type: "audio/webm"
+                        }
+                    );
+
+                const audioURL =
+                    URL.createObjectURL(
+                        audioBlob
+                    );
+
+                const audio =
+                    document.createElement(
+                        "audio"
+                    );
+
+                audio.controls = true;
+
+                audio.src = audioURL;
+
+                document.getElementById(
+                    "myRecording"
+                ).innerHTML = "";
+
+                document.getElementById(
+                    "myRecording"
+                ).appendChild(audio);
+
+                try {
+
+                    // J sound is used as the reference sound
+                    const referenceUrl =
+                        document.querySelector(
+                            "#jSound source"
+                        ).src;
+
+                    const response =
+                        await fetch(
+                            referenceUrl
+                        );
+
+                    const referenceData =
+                        await response.arrayBuffer();
+
+                    const userData =
+                        await audioBlob.arrayBuffer();
+
+                    const audioContext =
+                        ne
