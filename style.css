@@ -434,3 +434,23 @@ footer {
         justify-content: center;
     }
 }
+/* Back Button Style */
+.back-btn {
+    background: #ffffff;
+    color: #6a1b9a;
+    border: 2px solid #e1bee7;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: 0.2s ease;
+}
+
+.back-btn:hover {
+    background: #ff80ab;
+    color: white;
+    transform: scale(1.05);
+}
