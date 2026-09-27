@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Letter L Learning</title>
+    <title>Letter E Learning</title>
 
     <style>
         .card {
@@ -168,8 +168,6 @@ body{
     0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
     100% { transform: translateY(110vh) rotate(200deg); opacity: 0.5; }
 }
-
-        
     </style>
 
 </head>
@@ -178,11 +176,11 @@ body{
 <body>
 
     <div class="letter">
-        L  l
+        E  e
     </div>
     
 
-<button onclick="playIntro()">🔤 This is Letter L</button>
+<button onclick="playIntro()">🔤 This is Letter E</button>
 <button onclick="playSound()">🔊 Hear the Sound</button>
 <button onclick="startRecording()">🎤 Record My Voice</button>
 <div id="myRecording"></div>
@@ -197,23 +195,23 @@ body{
 </div>
 
 <audio id="repeatSound">
-    <source src="{{ url_for('static', filename='sounds/l_repeat.mp3') }}" type="audio/mpeg">
+    <source src="{{ url_for('static', filename='sounds/e_repeat.mp3') }}" type="audio/mpeg">
 </audio>
-    <audio id="lSound">
-        <source src="{{ url_for('static', filename='sounds/l_sound.mp3')}}" type="audio/mpeg"></audio>
+    <audio id="eSound">
+        <source src="{{ url_for('static', filename='sounds/e_sound.mp3')}}" type="audio/mpeg"></audio>
 
 <script>
 
 function playIntro() {
     let audio = new Audio(
-        "{{ url_for('static', filename='sounds/l_intro.mp3') }}"
+        "{{ url_for('static', filename='sounds/e_intro.mp3') }}"
     );
 
     audio.play();
 }
 
 function playSound() {
-    let audio = document.getElementById("lSound");
+    let audio = document.getElementById("eSound");
     let letter = document.querySelector(".letter");
 
     audio.currentTime = 0;
@@ -228,7 +226,7 @@ let recognition;
 let mediaRecorder;
 let audioChunks = [];
 
-/* ---------------- VOICE COMPARISON (same fixed logic as Letter E) ----------------
+/* ---------------- VOICE COMPARISON (same fixed logic as Letter A) ----------------
    1. Trims silence from both clips (adaptive threshold, not a fixed number)
    2. Averages a real FFT spectrum over the WHOLE clip (not just the first frame)
    3. Compares spectral SHAPE (cosine similarity, cubed to sharpen differences)
@@ -559,7 +557,7 @@ async function startRecording() {
             try {
                 // Use the already-resolved URL of the reference <source> tag,
                 // so this works whether it comes from url_for() or a plain path.
-                const referenceUrl = document.querySelector("#lSound source").src;
+                const referenceUrl = document.querySelector("#eSound source").src;
 
                 const response = await fetch(referenceUrl);
                 const referenceData = await response.arrayBuffer();
@@ -608,33 +606,35 @@ async function startRecording() {
     }
 }
 function goToPrevious() {
-    window.location.href = "/letter_k";
+    window.location.href = "/letter_d";
 }
 
+
 function goToNext() {
-    window.location.href = "/letter_m";
+    window.location.href = "/letter_f";
 }
 
 </script>
 
-    <p>Sound : / ll /</p>
+    <p>Sound : /A/</p>
 
     <h3>Pictures</h3>
 
     <div class="card">
-    <img src="{{ url_for('static', filename='images/lion.jpg') }}" >
-    <p>Lion</p>
+    <img src="{{ url_for('static', filename='images/egg.jpg') }}" >
+    <p>Egg</p>
     </div>
 
     <div class="card">
-    <img src="{{ url_for('static', filename='images/leaf.jpg') }}" >   
-    <p>Leaf</p>
-    </div>    
+    <img src="{{ url_for('static', filename='images/elephant.jpg') }}" >   
+    <p>Elephant</p>
+    </div>
+
+    
     <br><br>
 <button onclick="goToPrevious()">
     ← Previous
 </button>
-
 
 <button onclick="goToNext()">
     Next ➜
