@@ -425,7 +425,14 @@ function compareVoice(referenceAudio, userAudio) {
     const userFeat = getAudioFeatures(userData, userAudio.sampleRate);
 
     const rawShapeScore = Math.max(0, cosineSimilarity(refFeat.shapeBands, userFeat.shapeBands));
-    const shapeScore = Math.pow(rawShapeScore, 3);
+
+    // "M" is a low nasal hum that many unrelated sounds resemble loosely,
+    // so this page needs a stricter shape gate than the other letters.
+    if (rawShapeScore < 0.55) {
+        return 0;
+    }
+
+    const shapeScore = Math.pow(rawShapeScore, 5);
 
     const centroidRatio = Math.min(refFeat.centroid, userFeat.centroid) /
                            Math.max(refFeat.centroid, userFeat.centroid, 1);
@@ -436,12 +443,12 @@ function compareVoice(referenceAudio, userAudio) {
                       Math.max(refDuration, userDuration, 0.01);
     const durationScore = Math.sqrt(rawRatio);
 
-    const baseScore = shapeScore * 0.75 + durationScore * 0.25;
+    const baseScore = shapeScore * 0.8 + durationScore * 0.2;
 
-    const CENTROID_CUTOFF = 0.85;
+    const CENTROID_CUTOFF = 0.93;
     const centroidPenalty = centroidRatio >= CENTROID_CUTOFF
         ? 1
-        : Math.pow(centroidRatio / CENTROID_CUTOFF, 4);
+        : Math.pow(centroidRatio / CENTROID_CUTOFF, 6);
 
     const finalScore = baseScore * centroidPenalty * 100;
 
