@@ -1,32 +1,337 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>User Login</title>
-</head>
+    <meta charset="UTF-8">
+    <title>Cute Lamp Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Baloo 2', cursive;
+            background-color: #12131C;
+            color: #FFFFFF;
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        h2 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #FFB84D;
+            text-align: center;
+            margin: 0 0 20px 0;
+        }
+
+        /* Side-by-Side Layout Container */
+        .wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px; /* Space between Lamp and Form */
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Lamp Container on the Side */
+        .lamp-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .lamp-container {
+            position: relative;
+            width: 140px;
+            height: 180px;
+            cursor: pointer;
+            user-select: none;
+            z-index: 10;
+        }
+
+        .lamp-shade {
+            width: 120px;
+            height: 90px;
+            background: #2B2D3C;
+            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+            border-radius: 12px 12px 0 0;
+            margin: 0 auto;
+            position: relative;
+            transition: background 0.4s ease, box-shadow 0.4s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lamp-face {
+            font-size: 22px;
+            margin-top: 15px;
+            transition: transform 0.2s ease;
+        }
+
+        .lamp-stand {
+            width: 12px;
+            height: 65px;
+            background: #3F4257;
+            margin: 0 auto;
+        }
+
+        .lamp-base {
+            width: 80px;
+            height: 14px;
+            background: #3F4257;
+            border-radius: 10px;
+            margin: 0 auto;
+        }
+
+        /* Pull Cord / Thread */
+        .cord-wrapper {
+            position: absolute;
+            top: 85px;
+            left: 35px;
+            width: 20px;
+            height: 65px;
+            cursor: grab;
+            transition: transform 0.15s ease-out;
+        }
+
+        .cord-wrapper:active {
+            cursor: grabbing;
+            transform: translateY(15px);
+        }
+
+        .cord-line {
+            width: 3px;
+            height: 50px;
+            background: #7A7E9D;
+            margin: 0 auto;
+        }
+
+        .cord-handle {
+            width: 12px;
+            height: 12px;
+            background: #FFB84D;
+            border-radius: 50%;
+            margin: 0 auto;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        /* Light ON State */
+        body.light-on {
+            background-color: #1A1C29;
+        }
+
+        body.light-on .lamp-shade {
+            background: #FFB84D;
+            box-shadow: 0 0 35px rgba(255, 184, 77, 0.7);
+        }
+
+        .pull-hint {
+            font-size: 14px;
+            color: #7A7E9D;
+            margin-top: 12px;
+            animation: bounce 1.5s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        body.light-on .pull-hint {
+            opacity: 0;
+        }
+
+        /* Login Box Styles (Hidden until light is ON) */
+        .login-box {
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        body.light-on .login-box {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        form {
+            background: #1E1F2B;
+            border-radius: 24px;
+            padding: 30px 28px;
+            width: 280px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 2px solid #2E3040;
+        }
+
+        .field {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .icon {
+            position: absolute;
+            left: 14px;
+            top: 14px;
+            font-size: 18px;
+            z-index: 1;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 16px 6px 42px;
+            border-radius: 14px;
+            border: 2px solid #323548;
+            background: #14151F;
+            color: #FFFFFF;
+            font-family: 'Baloo 2', cursive;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #FFB84D;
+            box-shadow: 0 0 8px rgba(255, 184, 77, 0.3);
+        }
+
+        .field label {
+            position: absolute;
+            left: 42px;
+            top: 14px;
+            font-size: 15px;
+            color: #7A7E9D;
+            font-weight: 600;
+            pointer-events: none;
+            transition: 0.2s;
+        }
+
+        input:focus + label,
+        input:not(:placeholder-shown) + label {
+            top: 4px;
+            font-size: 11px;
+            color: #FFB84D;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 14px;
+            background: #FFB84D;
+            color: #12131C;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #FFA726;
+        }
+
+        .skip-btn {
+            background: transparent;
+            color: #8E92B2;
+            border: 1px solid #323548;
+            margin-top: 10px;
+        }
+
+        .skip-btn:hover {
+            background: #252736;
+            color: #FFFFFF;
+        }
+
+        a {
+            color: #FFB84D;
+            font-weight: 600;
+            text-decoration: none;
+        }
+    </style>
+</head>
 <body>
 
-<h2>User Login</h2>
+<h2>Cute Lamp Login</h2>
 
-<form action="/login" method="POST">
+<div class="wrapper">
+    <!-- Left Side: Cute Lamp -->
+    <div class="lamp-section">
+        <div class="lamp-container">
+            <div class="lamp-shade">
+                <span class="lamp-face" id="lampFace">😴</span>
+            </div>
+            <div class="lamp-stand"></div>
+            <div class="lamp-base"></div>
+            
+            <!-- Pull Cord / Thread -->
+            <div class="cord-wrapper" id="cordBtn" title="Pull thread to turn on">
+                <div class="cord-line"></div>
+                <div class="cord-handle"></div>
+            </div>
+        </div>
+        <div class="pull-hint">👇 Pull Thread</div>
+    </div>
 
-    <label>your name:</label><br>
-    <input type="text" name="name" required><br><br>
+    <!-- Right Side: Login Form -->
+    <div class="login-box">
 
-    
+        {% if error %}
+          <p style="color:#FF5252; text-align:center;">{{ error }}</p>
+          <a href="/forgot_password?name={{ name }}" style="display:block; text-align:center; margin-bottom:10px;">Forgot Password?</a>
+        {% endif %}
 
-    <label>code:</label><br>
-    <input type="code" name="code" required><br><br>
+        <form action="{{ action or '/login' }}" method="POST" autocomplete="off">
 
-    <button type="submit">Welcome, Little Learner! </button>
+            <div class="field">
+                <span class="icon">🧒</span>
+                <input type="text" name="name" placeholder=" " autocomplete="off" required>
+                <label>your name</label>
+            </div>
 
-</form>
+            <div class="field">
+                <span class="icon">🔑</span>
+                <input type="code" name="code" placeholder=" " autocomplete="off" required>
+                <label>code</label>
+            </div>
 
-<br>
+            <button type="submit">Welcome, Little Learner!</button>
 
-<a href="/test?level=easy">
-    <button type="button">Skip for now</button>
-</a>
+        </form>
+
+        <a href="/test?level=easy" style="width: 100%; display: block;">
+            <button type="button" class="skip-btn">Skip for now</button>
+        </a>
+
+    </div>
+</div>
+
+<script>
+    const cordBtn = document.getElementById('cordBtn');
+    const lampFace = document.getElementById('lampFace');
+    let isLightOn = false;
+
+    cordBtn.addEventListener('click', () => {
+        isLightOn = !isLightOn;
+        
+        if (isLightOn) {
+            document.body.classList.add('light-on');
+            lampFace.textContent = '😊';
+        } else {
+            document.body.classList.remove('light-on');
+            lampFace.textContent = '😴';
+        }
+    });
+</script>
 
 </body>
 </html>
