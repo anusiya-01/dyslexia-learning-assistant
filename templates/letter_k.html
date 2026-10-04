@@ -452,7 +452,7 @@ function compareVoice(referenceAudio, userAudio) {
     const bandPenalty = bandDistance == 1 ? 1
                        : Math.pow(0.45, bandDistance - 1);
 
-    const finalScore = baseScore * centroidPenalty * bandPenalty * 100;
+    const finalScore = baseScore * centroidPenalty  * 100;
 
     return Math.round(Math.max(0, Math.min(100, finalScore)));
 }
