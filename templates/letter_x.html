@@ -414,8 +414,7 @@ function compareVoice(referenceAudio, userAudio) {
     const refFeat = getAudioFeatures(refData, referenceAudio.sampleRate);
     const userFeat = getAudioFeatures(userData, userAudio.sampleRate);
 
-    const rawShapeScore = Math.max(0, cosineSimilarity(refFeat.shapeBands, userFeat.shapeBands));
-    const shapeScore = Math.pow(rawShapeScore, 3);
+    const shapeScore = Math.max(0, cosineSimilarity(refFeat.shapeBands, userFeat.shapeBands));
 
     const centroidRatio = Math.min(refFeat.centroid, userFeat.centroid) /
                            Math.max(refFeat.centroid, userFeat.centroid, 1);
@@ -426,22 +425,17 @@ function compareVoice(referenceAudio, userAudio) {
                       Math.max(refDuration, userDuration, 0.01);
     const durationScore = Math.sqrt(rawRatio);
 
-    const baseScore = shapeScore * 0.75 + durationScore * 0.25;
-
-    const CENTROID_CUTOFF = 0.85;
-    const centroidPenalty = centroidRatio >= CENTROID_CUTOFF
-        ? 1
-        : Math.pow(centroidRatio / CENTROID_CUTOFF, 4);
-
-    const finalScore = baseScore * centroidPenalty * 100;
-    
+    const finalScore =
+        (shapeScore * 0.45 +
+         centroidRatio * 0.35 +
+         durationScore * 0.20) * 100;
 
     return Math.round(Math.max(0, Math.min(100, finalScore)));
 }
 
 function getStars(score) {
-    if (score >= 85) return 3;
-    if (score >= 60) return 2;
+    if (score >= 78) return 3;
+    if (score >= 55) return 2;
     return 0;
 }
 
