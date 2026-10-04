@@ -429,7 +429,7 @@ function compareVoice(referenceAudio, userAudio) {
     const userFeat = getAudioFeatures(userData, userAudio.sampleRate);
 
     const rawShapeScore = Math.max(0, cosineSimilarity(refFeat.shapeBands, userFeat.shapeBands));
-    const shapeScore = Math.pow(rawShapeScore, 4);
+    const shapeScore = Math.pow(rawShapeScore, 2.5);
 
     const centroidRatio = Math.min(refFeat.centroid, userFeat.centroid) /
                            Math.max(refFeat.centroid, userFeat.centroid, 1);
