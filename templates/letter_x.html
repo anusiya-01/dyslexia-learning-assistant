@@ -425,10 +425,20 @@ function compareVoice(referenceAudio, userAudio) {
                       Math.max(refDuration, userDuration, 0.01);
     const durationScore = Math.sqrt(rawRatio);
 
+    function argmax(arr) {
+        let best = 0;
+        for (let i = 1; i < arr.length; i++) if (arr[i] > arr[best]) best = i;
+        return best;
+    }
+    const refDominant = argmax(refFeat.shapeBands);
+    const userDominant = argmax(userFeat.shapeBands);
+    const bandDistance = Math.abs(refDominant - userDominant);
+    const bandPenalty = bandDistance <= 1 ? 1 : Math.pow(0.5, bandDistance - 1);
+
     const finalScore =
         (shapeScore * 0.45 +
          centroidRatio * 0.35 +
-         durationScore * 0.20) * 100;
+         durationScore * 0.20) * bandPenalty * 100;
 
     return Math.round(Math.max(0, Math.min(100, finalScore)));
 }
