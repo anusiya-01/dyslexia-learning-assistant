@@ -226,14 +226,14 @@ let recognition;
 let mediaRecorder;
 let audioChunks = [];
 
-/* ---------------- VOICE COMPARISON (same fixed logic as Letter A) ----------------
+/* ---------------- VOICE COMPARISON (tightened version) ----------------
    1. Trims silence from both clips (adaptive threshold, not a fixed number)
    2. Averages a real FFT spectrum over the WHOLE clip (not just the first frame)
-   3. Compares spectral SHAPE (cosine similarity, cubed to sharpen differences)
-   4. Compares spectral CENTROID (where the sound's energy sits - the strongest
-      signal for telling different letter sounds apart) - acts as a gate so a
-      wrong sound can't fake a high score just by having okay shape/duration
-   5. Compares duration (softened - speakers naturally differ in timing)
+   3. Compares spectral SHAPE (cosine similarity, raised to power 4 to sharpen)
+   4. Compares spectral CENTROID (where the sound's energy sits) as a hard gate
+   5. Compares dominant frequency band (argmax) as an extra independent gate,
+      so a wrong sound can't compensate with okay shape/duration elsewhere
+   6. Compares duration (softened - speakers naturally differ in timing)
 ------------------------------------------------------------------------------- */
 
 function trimSilence(data, sampleRate) {
@@ -407,6 +407,12 @@ function rmsOf(data) {
     return Math.sqrt(sum / data.length);
 }
 
+function argmax(arr) {
+    let best = 0;
+    for (let i = 1; i < arr.length; i++) if (arr[i] > arr[best]) best = i;
+    return best;
+}
+
 function compareVoice(referenceAudio, userAudio) {
 
     const refRaw = referenceAudio.getChannelData(0);
@@ -423,7 +429,7 @@ function compareVoice(referenceAudio, userAudio) {
     const userFeat = getAudioFeatures(userData, userAudio.sampleRate);
 
     const rawShapeScore = Math.max(0, cosineSimilarity(refFeat.shapeBands, userFeat.shapeBands));
-    const shapeScore = Math.pow(rawShapeScore, 3);
+    const shapeScore = Math.pow(rawShapeScore, 4);
 
     const centroidRatio = Math.min(refFeat.centroid, userFeat.centroid) /
                            Math.max(refFeat.centroid, userFeat.centroid, 1);
@@ -434,12 +440,17 @@ function compareVoice(referenceAudio, userAudio) {
                       Math.max(refDuration, userDuration, 0.01);
     const durationScore = Math.sqrt(rawRatio);
 
-    const baseScore = shapeScore * 0.75 + durationScore * 0.25;
+    const refDominant = argmax(refFeat.shapeBands);
+    const userDominant = argmax(userFeat.shapeBands);
+    const bandDistance = Math.abs(refDominant - userDominant);
+    const bandPenalty = bandDistance === 0 ? 1 : Math.pow(0.5, bandDistance);
 
-    const CENTROID_CUTOFF = 0.85;
+    const baseScore = shapeScore * 0.65 + durationScore * 0.15 + bandPenalty * 0.20;
+
+    const CENTROID_CUTOFF = 0.9;
     const centroidPenalty = centroidRatio >= CENTROID_CUTOFF
         ? 1
-        : Math.pow(centroidRatio / CENTROID_CUTOFF, 4);
+        : Math.pow(centroidRatio / CENTROID_CUTOFF, 6);
 
     const finalScore = baseScore * centroidPenalty * 100;
 
