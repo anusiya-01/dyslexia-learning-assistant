@@ -447,10 +447,10 @@ function compareVoice(referenceAudio, userAudio) {
 
     const baseScore = shapeScore * 0.65 + durationScore * 0.15 + bandPenalty * 0.20;
 
-    const CENTROID_CUTOFF = 0.9;
+    const CENTROID_CUTOFF = 0.85;
     const centroidPenalty = centroidRatio >= CENTROID_CUTOFF
-        ? 1
-        : Math.pow(centroidRatio / CENTROID_CUTOFF, 6);
+    ? 1
+    : Math.pow(centroidRatio / CENTROID_CUTOFF, 4);
 
     const finalScore = baseScore * centroidPenalty * 100;
 
