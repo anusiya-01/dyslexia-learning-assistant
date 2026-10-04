@@ -433,7 +433,7 @@ function compareVoice(referenceAudio, userAudio) {
     const refDominant = argmax(refFeat.shapeBands);
     const userDominant = argmax(userFeat.shapeBands);
     const bandDistance = Math.abs(refDominant - userDominant);
-    const bandPenalty = bandDistance <= 1 ? 1 : Math.pow(0.5, bandDistance - 1);
+    const bandPenalty = bandDistance <= 2 ? 1 : Math.pow(0.65, bandDistance - 2);
 
     const finalScore =
         (shapeScore * 0.45 +
