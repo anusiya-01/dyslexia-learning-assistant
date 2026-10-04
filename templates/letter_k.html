@@ -420,7 +420,7 @@ function compareVoice(referenceAudio, userAudio) {
     const refData = trimSilence(refRaw, referenceAudio.sampleRate);
     const userData = trimSilence(userRaw, userAudio.sampleRate);
 
-    if (rmsOf(userData) < 0.0025 || userData.length < userAudio.sampleRate * 0.03) {
+    if (rmsOf(userData) < 0.0015 || userData.length < userAudio.sampleRate * 0.015) {
         return 0;
     }
 
