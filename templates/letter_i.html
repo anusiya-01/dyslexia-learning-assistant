@@ -423,7 +423,7 @@ function compareVoice(referenceAudio, userAudio) {
     const userFeat = getAudioFeatures(userData, userAudio.sampleRate);
 
     const rawShapeScore = Math.max(0, cosineSimilarity(refFeat.shapeBands, userFeat.shapeBands));
-    const shapeScore = Math.pow(rawShapeScore, 3.5);
+    const shapeScore = Math.pow(rawShapeScore, 3);
 
     const centroidRatio = Math.min(refFeat.centroid, userFeat.centroid) /
                            Math.max(refFeat.centroid, userFeat.centroid, 1);
@@ -437,10 +437,10 @@ function compareVoice(referenceAudio, userAudio) {
     const baseScore = shapeScore * 0.75 + durationScore * 0.25;
 
     // Gate 1: spectral centroid must line up reasonably well
-    const CENTROID_CUTOFF = 0.85;
+    const CENTROID_CUTOFF = 0.9;
     const centroidPenalty = centroidRatio >= CENTROID_CUTOFF
         ? 1
-        : Math.pow(centroidRatio / CENTROID_CUTOFF, 4);
+        : Math.pow(centroidRatio / CENTROID_CUTOFF, 6);
 
     // Gate 2: which frequency band holds the MOST energy (a rough stand-in
     // for which vowel/formant region was hit). A shift of exactly one band
