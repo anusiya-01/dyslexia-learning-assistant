@@ -460,8 +460,8 @@ function compareVoice(referenceAudio, userAudio) {
 /* ---------------- STARS + POP-UP (kid-friendly, no text to read) ---------------- */
 
 function getStars(score) {
-    if (score >= 85) return 3;   // accurate / correct sound
-    if (score >= 60) return 2;   // close, somewhat matching
+    if (score >= 70) return 3;   // accurate / correct sound
+    if (score >= 45) return 2;   // close, somewhat matching
     return 0;                    // wrong sound - no partial credit
 }
 
