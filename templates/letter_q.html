@@ -408,6 +408,11 @@ function rmsOf(data) {
     for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
     return Math.sqrt(sum / data.length);
 }
+function argmax(arr) {
+    let best = 0;
+    for (let i = 1; i < arr.length; i++) if (arr[i] > arr[best]) best = i;
+    return best;
+}
 
 function compareVoice(referenceAudio, userAudio) {
 
