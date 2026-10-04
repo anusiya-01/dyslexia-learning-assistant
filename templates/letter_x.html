@@ -434,7 +434,7 @@ function compareVoice(referenceAudio, userAudio) {
         : Math.pow(centroidRatio / CENTROID_CUTOFF, 4);
 
     const finalScore = baseScore * centroidPenalty * 100;
-    console.log("DEBUG X -> shapeScore:", shapeScore.toFixed(3), "| centroidRatio:", centroidRatio.toFixed(3), "| durationScore:", durationScore.toFixed(3), "| finalScore:", Math.round(finalScore));
+    
 
     return Math.round(Math.max(0, Math.min(100, finalScore)));
 }
