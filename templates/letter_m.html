@@ -428,7 +428,7 @@ function compareVoice(referenceAudio, userAudio) {
 
     // "M" is a low nasal hum that many unrelated sounds resemble loosely,
     // so this page needs a stricter shape gate than the other letters.
-    if (rawShapeScore < 0.55) {
+    if (rawShapeScore < 0.40) {
         return 0;
     }
 
