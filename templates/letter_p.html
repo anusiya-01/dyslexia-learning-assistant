@@ -408,6 +408,11 @@ function rmsOf(data) {
     for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
     return Math.sqrt(sum / data.length);
 }
+    function argmax(arr) {
+    let best = 0;
+    for (let i = 1; i < arr.length; i++) if (arr[i] > arr[best]) best = i;
+    return best;
+}
 
 function compareVoice(referenceAudio, userAudio) {
 
@@ -447,8 +452,15 @@ const shapeScore = Math.pow(rawShapeScore, 2.5);
     const centroidPenalty = centroidRatio >= CENTROID_CUTOFF
         ? 1
         : Math.pow(centroidRatio / CENTROID_CUTOFF, 4);
+    const refDominant = argmax(refFeat.shapeBands);
+    const userDominant = argmax(userFeat.shapeBands);
+    const bandDistance = Math.abs(refDominant - userDominant);
+    const bandPenalty = bandDistance <= 1 ? 1
+                   : Math.pow(0.45, bandDistance - 1);
 
-    const finalScore = baseScore * centroidPenalty * 100;
+     const finalScore = baseScore * centroidPenalty * bandPenalty * 100;
+
+    
 
     return Math.round(Math.max(0, Math.min(100, finalScore)));
 }
