@@ -455,8 +455,8 @@ const shapeScore = Math.pow(rawShapeScore, 2.5);
     const refDominant = argmax(refFeat.shapeBands);
     const userDominant = argmax(userFeat.shapeBands);
     const bandDistance = Math.abs(refDominant - userDominant);
-    const bandPenalty = bandDistance <= 1 ? 1
-                   : Math.pow(0.45, bandDistance - 1);
+    const bandPenalty = bandDistance <= 2 ? 1
+                   : Math.pow(0.5, bandDistance - 2);
 
      const finalScore = baseScore * centroidPenalty * bandPenalty * 100;
 
