@@ -458,7 +458,7 @@ const shapeScore = Math.pow(rawShapeScore, 2.5);
     const bandPenalty = bandDistance <= 2 ? 1
                    : Math.pow(0.5, bandDistance - 2);
 
-     const finalScore = baseScore * centroidPenalty * bandPenalty * 100;
+     const finalScore = baseScore * centroidPenalty * 100;
 
     
 
